@@ -2,6 +2,8 @@ package com.basic.myspringboot.runner;
 
 import com.basic.myspringboot.config.CustomerVO;
 import com.basic.myspringboot.property.MyBootProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -25,6 +27,8 @@ public class MyRunner implements ApplicationRunner {
 
     @Autowired
     private CustomerVO customerVO;
+
+    private Logger logger = LoggerFactory.getLogger(MyRunner.class);
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
