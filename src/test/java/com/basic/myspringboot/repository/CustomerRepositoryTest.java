@@ -22,13 +22,16 @@ class CustomerRepositoryTest {
     CustomerRepository customerRepository;
 
     @Test
+    @Rollback(value = false)
     void testUpdateCustomer() {
         Customer customer = customerRepository.findById(1L)  //Optional<Customer>
                 .orElseThrow(() -> new RuntimeException("Customer Not Found"));
-        //수정하려면 Entity의 setter method를 호출한다.
-        customer.setCustomerName("스프링부트");
-        customerRepository.save(customer);
-        assertThat(customer.getCustomerName()).isEqualTo("스프링부트");
+        //수정하려면 Entity의 setter method를 호출한다. dirty read
+        //update customers set customer_id=?,customer_name=? where id=? (@DynamicUpdate 적용전)
+        //update customers set customer_name=? where id=? (@DynamicUpdate 적용후)
+        customer.setCustomerName("홍길동");
+        //customerRepository.save(customer);
+        assertThat(customer.getCustomerName()).isEqualTo("홍길동");
     }
 
 
