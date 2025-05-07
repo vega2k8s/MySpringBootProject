@@ -9,5 +9,5 @@ import java.util.Optional;
 public interface CustomerRepository extends JpaRepository<Customer,Long> {
     //Query Method 정의하면 JPA가 JPQL(java persistence query language)
     Optional<Customer> findByCustomerId(String id);
-    List<Customer> findByCustomerName(String name);
+    List<Customer> findByCustomerNameContains(String name);
 }
