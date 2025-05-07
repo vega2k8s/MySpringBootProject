@@ -22,6 +22,15 @@ class CustomerRepositoryTest {
     CustomerRepository customerRepository;
 
     @Test
+    void testByNotFoundException() {
+        //<X extends Throwable> T orElseThrow(Supplier<? extends X> exceptionSupplier)
+        //Supplier 의 추상메서드 T get()
+        Customer customer = customerRepository.findByCustomerId("A001")
+                .orElseThrow(() -> new RuntimeException("Customer Not Found"));
+        assertThat(customer.getCustomerId()).isEqualTo("A001");
+    }
+
+    @Test
     //@Disabled
     void testFindBy() {
         Optional<Customer> optionalCustomer = customerRepository.findById(1L);
