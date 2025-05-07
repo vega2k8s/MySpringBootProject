@@ -30,6 +30,12 @@ class CustomerRepositoryTest {
             Customer existCustomer = optionalCustomer.get();
             assertThat(existCustomer.getId()).isEqualTo(1L);
         }
+        //Optional 의 T orElseGet(Supplier<? extends T> supplier)
+        //Supplier 의 추상메서드 T get()
+        Optional<Customer> optionalCustomer2 = customerRepository.findByCustomerId("A001");
+        Customer a001customer = optionalCustomer2.orElseGet(() -> new Customer());
+        assertThat(a001customer.getCustomerName()).isEqualTo("스프링");
+
     }
 
     @Test
