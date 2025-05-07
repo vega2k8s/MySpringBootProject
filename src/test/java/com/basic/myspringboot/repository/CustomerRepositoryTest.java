@@ -32,9 +32,15 @@ class CustomerRepositoryTest {
         }
         //Optional 의 T orElseGet(Supplier<? extends T> supplier)
         //Supplier 의 추상메서드 T get()
+        //고객번호가 존재하는 경우
         Optional<Customer> optionalCustomer2 = customerRepository.findByCustomerId("A001");
         Customer a001customer = optionalCustomer2.orElseGet(() -> new Customer());
         assertThat(a001customer.getCustomerName()).isEqualTo("스프링");
+
+        //고객번호가 존재하지 않는 경우
+        Customer notFoundCustomer = customerRepository.findByCustomerId("A004")
+                .orElseGet(() -> new Customer());
+        assertThat(notFoundCustomer.getCustomerName()).isNull();
 
     }
 
