@@ -36,6 +36,9 @@ public class UserRestController {
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id){
         Optional<User> optionalUser = userRepository.findById(id);
+        //public <U> Optional<U> map(Function<? super T,? extends U> mapper)
+        //Function 의 추상메서드 R apply(T t)
+        optionalUser.map()
     }
 
 }
