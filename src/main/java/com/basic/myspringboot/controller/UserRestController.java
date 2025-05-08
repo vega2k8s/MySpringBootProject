@@ -3,9 +3,11 @@ package com.basic.myspringboot.controller;
 import com.basic.myspringboot.entity.User;
 import com.basic.myspringboot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 //@Controller + @ResponseBody
 @RestController
@@ -29,6 +31,11 @@ public class UserRestController {
     @GetMapping
     public List<User> getUsers() {
         return userRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Long id){
+        Optional<User> optionalUser = userRepository.findById(id);
     }
 
 }
