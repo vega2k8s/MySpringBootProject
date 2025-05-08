@@ -38,7 +38,8 @@ public class UserRestController {
         Optional<User> optionalUser = userRepository.findById(id);
         //public <U> Optional<U> map(Function<? super T,? extends U> mapper)
         //Function 의 추상메서드 R apply(T t)
-        optionalUser.map()
+        optionalUser.map(user -> ResponseEntity.ok(user)) //Optional<ResponseEntity>
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }
