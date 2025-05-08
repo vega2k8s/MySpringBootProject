@@ -1,6 +1,7 @@
 package com.basic.myspringboot.controller;
 
 import com.basic.myspringboot.entity.User;
+import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,5 +49,15 @@ public class UserRestController {
 //        return optionalUser.map(ResponseEntity::ok)
 //                .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/email/{email}/")  //http://localhost:8080/api/users/id/100
+    public User getUserByEmail(@PathVariable String email){
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        User existUser =
+                optionalUser.orElseThrow(() -> new BusinessException("User Not Found",HttpStatus.NOT_FOUND));
+        return existUser;
+    }
+
+
 
 }
