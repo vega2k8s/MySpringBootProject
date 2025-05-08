@@ -58,6 +58,16 @@ public class UserRestController {
         return existUser;
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetail){
+        User existUser = userRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("User Not Found", HttpStatus.NOT_FOUND));
+        //setter method 호출
+        existUser.setName(userDetail.getName());
+        User updatedUser = userRepository.save(existUser);
+        return ResponseEntity.ok(updatedUser);
+//        return ResponseEntity.ok(userRepository.save(existUser));
+    }
 
 
 }
