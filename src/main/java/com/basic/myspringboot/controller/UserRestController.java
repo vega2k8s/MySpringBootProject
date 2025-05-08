@@ -3,10 +3,9 @@ package com.basic.myspringboot.controller;
 import com.basic.myspringboot.entity.User;
 import com.basic.myspringboot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 //@Controller + @ResponseBody
 @RestController
@@ -27,6 +26,9 @@ public class UserRestController {
         return userRepository.save(user);
     }
 
-
+    @GetMapping
+    public List<User> getUsers() {
+        return userRepository.findAll();
+    }
 
 }
