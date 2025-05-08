@@ -53,20 +53,32 @@ public class UserRestController {
     @GetMapping("/email/{email}/")  //http://localhost:8080/api/users/id/100
     public User getUserByEmail(@PathVariable String email){
         Optional<User> optionalUser = userRepository.findByEmail(email);
-        User existUser =
-                optionalUser.orElseThrow(() -> new BusinessException("User Not Found",HttpStatus.NOT_FOUND));
+        User existUser = getExistUser(optionalUser);
         return existUser;
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetail){
-        User existUser = userRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("User Not Found", HttpStatus.NOT_FOUND));
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetail) {
+        User existUser = getExistUser(userRepository.findById(id));
         //setter method 호출
         existUser.setName(userDetail.getName());
         User updatedUser = userRepository.save(existUser);
         return ResponseEntity.ok(updatedUser);
 //        return ResponseEntity.ok(userRepository.save(existUser));
+    }
+
+    private User getExistUser(Optional<User> optionalUser) {
+        User existUser = optionalUser
+                .orElseThrow(() -> new BusinessException("User Not Found", HttpStatus.NOT_FOUND));
+        return existUser;
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        User user = getExistUser(userRepository.findById(id));
+        userRepository.delete(user);
+        //return ResponseEntity.ok(user);
+        return ResponseEntity.ok().build();
     }
 
 
