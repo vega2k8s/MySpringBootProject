@@ -20,8 +20,16 @@ public class UserService {
 
     //등록
     @Transactional
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UserDTO.UserResponse createUser(UserDTO.UserCreateRequest request) {
+        //Email 중복검사
+        userRepository.findByEmail(request.getEmail()) //Optional<User>
+                .ifPresent(
+                        user -> {
+                    throw new BusinessException("User with this Email already Exist",HttpStatus.CONFLICT);
+                        });
+        User user = request.toEntity();
+        User savedUser = userRepository.save(user);
+        return new UserDTO.UserResponse(savedUser);
     }
 
     public User getUserById(Long id) {
