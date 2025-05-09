@@ -13,9 +13,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+//읽기전용모드 (성능 최적화)
 public class UserService {
     private final UserRepository userRepository;
 
+    //등록
     @Transactional
     public User createUser(User user) {
         return userRepository.save(user);
@@ -30,22 +32,26 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    //수정
     @Transactional
     public User updateUserByEmail(String email, User userDetail) {
         User user = getUserByEmail(email);
-
+        //dirty read
         user.setName(userDetail.getName());
-        return userRepository.save(user);
-    }
-
-    @Transactional
-    public void deleteUser(Long id) {
-        User user = getUserById(id);
-        userRepository.delete(user);
+        //return userRepository.save(user);
+        return user;
     }
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException("User Not Found", HttpStatus.NOT_FOUND));
     }
+
+    //삭제
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = getUserById(id);
+        userRepository.delete(user);
+    }
+
 }
