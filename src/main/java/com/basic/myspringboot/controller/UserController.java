@@ -6,9 +6,11 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
@@ -38,6 +40,26 @@ public class UserController {
         return "index";
         //return "redirect:/index";
     }
+
+    @GetMapping("/edit/{id}")
+    public String showUpdateForm(@PathVariable("id") long id, Model model) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+        model.addAttribute("user", user);
+        return "update-user";
+    }
+    @PostMapping("/update/{id}")
+    public String updateUser(@PathVariable("id") long id,
+                             @Valid @ModelAttribute("user") User user,
+                             BindingResult result) {
+        if (result.hasErrors()) {
+            user.setId(id);
+            return "update-user";
+        }
+        userRepository.save(user);
+        return "redirect:/index";
+    }
+
 
     @GetMapping("/thymeleaf")
     public String leaf(Model model) {
