@@ -31,11 +31,14 @@ public class LambdaTest1 {
                 .toList() //Stream<String> => List<String>
                 .forEach(System.out::println);
 
+        System.out.println("============= Filter");
+
         //id가 103 보다 큰 Customer의 이름을 추출해라
         customers.stream() //List<MyCustomer> => Stream<MyCustomer>
                 //map(Function) Function의 추상메서드 R apply(T t)
-                //.filter()
-                .map(customer -> customer.getName())  //Stream<MyCustomer> => Stream<String>
+                .filter(customer -> customer.getId() >= 103 )
+                //.map(customer -> customer.getName())  //Stream<MyCustomer> => Stream<String>
+                .map(MyCustomer::getName)
                 .toList() //Stream<String> => List<String>
                 .forEach(System.out::println);
 
