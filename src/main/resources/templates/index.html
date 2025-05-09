@@ -8,12 +8,14 @@
         <th>Email</th>
         <th>Date</th>
         <th>Edit</th>
+        <th>Delete</th>
     </tr>
     <tr th:each="user : ${users}">
         <td th:text="${user.name}"></td>
         <td th:text="${user.email}"></td>
         <td th:text="${#temporals.format(user.createdAt,'yyyy-MM-dd hh:mm E a')}"></td>
         <td><a th:href="@{/edit/{id}(id=${user.id})}">update</a></td>
+        <td><a th:href="@{/delete/{id}(id=${user.id})}">delete</a></td>
     </tr>
 </table>
 <p>
