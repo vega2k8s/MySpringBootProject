@@ -5,10 +5,9 @@ import com.basic.myspringboot.entity.User;
 import com.basic.myspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,5 +26,15 @@ public class UserServiceController {
         return new UserDTO.UserResponse(savedUser);
     }
 
+    @GetMapping
+    public List<UserDTO.UserResponse> getUsers() {
+        return userService.getAllUsers()
+                //List<User> => Stream<User>
+                .stream()
+                //User -> UserDTO.UserResponse
+                .map(user -> new UserDTO.UserResponse(user))
+                //.map(UserDTO.UserResponse::new)
+                .toList();
+    }
 
 }
