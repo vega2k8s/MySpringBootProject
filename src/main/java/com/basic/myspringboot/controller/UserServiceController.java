@@ -5,6 +5,7 @@ import com.basic.myspringboot.entity.User;
 import com.basic.myspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,6 +49,15 @@ public class UserServiceController {
         return new UserDTO.UserResponse(userService.getUserByEmail(email));
     }
 
+    @PatchMapping("/{email}")
+    public UserDTO.UserResponse updateUser(@PathVariable String email,
+                                           @Valid @RequestBody UserDTO.UserUpdateRequest useDetail){
+        User user = new User();
+        user.setName(useDetail.getName());
+
+        User updatedUser = userService.updateUserByEmail(email, user);
+        return new UserDTO.UserResponse(updatedUser);
+    }
 
 
 }
