@@ -1,5 +1,6 @@
 package com.basic.myspringboot.service;
 
+import com.basic.myspringboot.controller.dto.UserDTO;
 import com.basic.myspringboot.entity.User;
 import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.repository.UserRepository;
@@ -34,7 +35,7 @@ public class UserService {
 
     //수정
     @Transactional
-    public User updateUserByEmail(String email, User userDetail) {
+    public User updateUserByEmail(String email, UserDTO.UserUpdateRequest userDetail) {
         User user = getUserByEmail(email);
         //dirty read
         user.setName(userDetail.getName());

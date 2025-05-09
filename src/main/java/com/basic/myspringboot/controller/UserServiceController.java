@@ -52,10 +52,8 @@ public class UserServiceController {
     @PatchMapping("/{email}")
     public UserDTO.UserResponse updateUser(@PathVariable String email,
                                            @Valid @RequestBody UserDTO.UserUpdateRequest useDetail){
-        User user = new User();
-        user.setName(useDetail.getName());
 
-        User updatedUser = userService.updateUserByEmail(email, user);
+        User updatedUser = userService.updateUserByEmail(email, useDetail);
         return new UserDTO.UserResponse(updatedUser);
     }
 
