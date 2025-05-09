@@ -23,6 +23,24 @@ public class LambdaTest1 {
                 new MyCustomer(104, "kely", "kely@gmail.com", Arrays.asList("389246829364", "948609467"))
         );
 
+        //Customer의 이름 목록(Name List)을 추출하기  List<String>
+        //List<MyCustomer> => List<String>
+        customers.stream() //List<MyCustomer> => Stream<MyCustomer>
+                //map(Function) Function의 추상메서드 R apply(T t)
+                .map(customer -> customer.getName())  //Stream<MyCustomer> => Stream<String>
+                .toList() //Stream<String> => List<String>
+                .forEach(System.out::println);
+
+        //id가 103 보다 큰 Customer의 이름을 추출해라
+        customers.stream() //List<MyCustomer> => Stream<MyCustomer>
+                //map(Function) Function의 추상메서드 R apply(T t)
+                //.filter()
+                .map(customer -> customer.getName())  //Stream<MyCustomer> => Stream<String>
+                .toList() //Stream<String> => List<String>
+                .forEach(System.out::println);
+
+        /*
+
         //email 주소 목록 List<String>
         List<String> emailList = customers.stream()  //Stream<MyCustomer>
                 .map(cust -> cust.getEmail()) //Stream<String>
@@ -48,6 +66,7 @@ public class LambdaTest1 {
                 .collect(toList()); //List<String>
         System.out.println("phoneList2 = " + phoneList2);
 
+        */
     }
     /*
         java.util.function 에 제공하는 함수형 인터페이스
