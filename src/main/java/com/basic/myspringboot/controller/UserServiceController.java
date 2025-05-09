@@ -37,4 +37,10 @@ public class UserServiceController {
                 .toList();
     }
 
+    @GetMapping("/{id}")
+    public UserDTO.UserResponse getUserById(@PathVariable Long id) {
+        User existUser = userService.getUserById(id);
+        return new UserDTO.UserResponse(existUser);
+    }
+
 }
