@@ -43,12 +43,12 @@ public class UserService {
 
     //수정
     @Transactional
-    public User updateUserByEmail(String email, UserDTO.UserUpdateRequest userDetail) {
+    public UserDTO.UserResponse updateUserByEmail(String email, UserDTO.UserUpdateRequest userDetail) {
         User user = getUserByEmail(email);
         //dirty read
         user.setName(userDetail.getName());
         //return userRepository.save(user);
-        return user;
+        return new UserDTO.UserResponse(user);
     }
 
     public User getUserByEmail(String email) {

@@ -47,11 +47,11 @@ public class UserServiceController {
     }
 
     @PatchMapping("/{email}")
-    public UserDTO.UserResponse updateUser(@PathVariable String email,
+    public ResponseEntity<UserDTO.UserResponse> updateUser(@PathVariable String email,
                                            @Valid @RequestBody UserDTO.UserUpdateRequest useDetail){
 
-        User updatedUser = userService.updateUserByEmail(email, useDetail);
-        return new UserDTO.UserResponse(updatedUser);
+        UserDTO.UserResponse updatedUser = userService.updateUserByEmail(email, useDetail);
+        return ResponseEntity.ok(updatedUser);
     }
 
 
