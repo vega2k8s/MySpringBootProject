@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +26,9 @@ public class StudentService {
     public List<StudentDTO.Response> getAllStudents() {
         return studentRepository.findAll()
                 .stream()
+                //.map(student -> StudentDTO.Response.fromEntity(student))
                 .map(StudentDTO.Response::fromEntity)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public StudentDTO.Response getStudentById(Long id) {
@@ -39,8 +39,8 @@ public class StudentService {
 
     public StudentDTO.Response getStudentByStudentNumber(String studentNumber) {
         Student student = studentRepository.findByStudentNumber(studentNumber)
-                .orElseThrow(() -> new BusinessException("Student not found with student number: " + studentNumber,
-                        HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Student not found with student number: "
+                        + studentNumber, HttpStatus.NOT_FOUND));
         return StudentDTO.Response.fromEntity(student);
     }
 
