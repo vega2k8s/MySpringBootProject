@@ -29,7 +29,8 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> {
                     // /api/users/welcome 패스는 인증 없이 접근 가능한 경로
-                    auth.requestMatchers("/api/users/welcome").permitAll()
+                    // /userinfos/new 패스는 user_info 엔티티를 추가하는 경로는 인증 필요 없음
+                    auth.requestMatchers("/api/users/welcome","/userinfos/new").permitAll()
                             // /api/users/** 패스는 인증 후에만 접근 가능한 경로임
                             .requestMatchers("/api/users/**").authenticated();
                 })
