@@ -23,7 +23,9 @@ public class UserInfoUserDetails implements UserDetails {
         //엔티티의 패스워드를 password 변수에 저장
         this.password=userInfo.getPassword();
         this.authorities= Arrays.stream(userInfo.getRoles().split(","))
+                //.map(roleName -> new SimpleGrantedAuthority(roleName))
                 .map(SimpleGrantedAuthority::new)
+                //Stream<SimpleGrantedAuthority> => List<SimpleGrantedAuthority>
                 .collect(Collectors.toList());
     }
 
