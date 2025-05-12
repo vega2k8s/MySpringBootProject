@@ -24,5 +24,6 @@ public class UserInfo {
     private String password;
 
     @Column(nullable = false)
+    //Admin, User
     private String roles;
 }
