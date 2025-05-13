@@ -39,6 +39,7 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<StudentDTO.Response> createStudent(@Valid @RequestBody StudentDTO.Request request) {
         StudentDTO.Response createdStudent = studentService.createStudent(request);
+        //HttpStatus.CREATED - 201
         return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
     }
 
