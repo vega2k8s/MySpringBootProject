@@ -128,7 +128,8 @@ public class StudentService {
             // Validate email is not already in use (if changing)
             if (request.getDetailRequest().getEmail() != null && 
                 !request.getDetailRequest().getEmail().isEmpty() &&
-                (studentDetail.getEmail() == null || !studentDetail.getEmail().equals(request.getDetailRequest().getEmail())) &&
+                (studentDetail.getEmail() == null || !studentDetail.getEmail()
+                        .equals(request.getDetailRequest().getEmail())) &&
                 studentDetailRepository.existsByEmail(request.getDetailRequest().getEmail())) {
                 throw new BusinessException("Student detail already exists with email: "
                         + request.getDetailRequest().getEmail(),
@@ -136,7 +137,8 @@ public class StudentService {
             }
             
             // Validate phone number is not already in use (if changing)
-            if ((studentDetail.getPhoneNumber() == null || !studentDetail.getPhoneNumber().equals(request.getDetailRequest().getPhoneNumber())) &&
+            if ((studentDetail.getPhoneNumber() == null || !studentDetail.getPhoneNumber()
+                    .equals(request.getDetailRequest().getPhoneNumber())) &&
                 studentDetailRepository.existsByPhoneNumber(request.getDetailRequest().getPhoneNumber())) {
                 throw new BusinessException("Student detail already exists with phone number: "
                         + request.getDetailRequest().getPhoneNumber(),
