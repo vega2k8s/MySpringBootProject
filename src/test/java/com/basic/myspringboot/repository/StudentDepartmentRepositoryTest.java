@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@TestPropertySource(locations="classpath:/application-test.properties")
 public class StudentDepartmentRepositoryTest {
 
     @Autowired
@@ -55,6 +57,7 @@ public class StudentDepartmentRepositoryTest {
                 .build();
         entityManager.persistAndFlush(studentDetail);
 
+        //양방항이므로 연관관계 저장
         student.setStudentDetail(studentDetail);
         entityManager.persistAndFlush(student);
     }
@@ -89,6 +92,7 @@ public class StudentDepartmentRepositoryTest {
         assertThat(found.get().getStudentDetail()).isNotNull();
         assertThat(found.get().getDepartment()).isNotNull();
         assertThat(found.get().getDepartment().getName()).isEqualTo("Computer Science");
+        assertThat(found.get().getStudentDetail().getEmail()).isEqualTo("john@example.com");
     }
 
     @Test
