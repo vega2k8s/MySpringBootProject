@@ -78,7 +78,7 @@ public class DataInitRunner implements CommandLineRunner {
     private void createStudents(List<Department> departments) {
         log.info("Creating students...");
 
-        Department cs = departments.get(0);
+        Department cs = departments.get(0);  //Department
         Department ee = departments.get(1);
         Department me = departments.get(2);
         Department ba = departments.get(3);
