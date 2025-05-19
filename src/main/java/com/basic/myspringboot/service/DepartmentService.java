@@ -20,12 +20,31 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final StudentRepository studentRepository;
 
+//    public List<DepartmentDTO.SimpleResponse> getAllDepartments() {
+//        return departmentRepository.findAll()
+//                .stream()
+//                .map(DepartmentDTO.SimpleResponse::fromEntity)
+//                .toList();
+//    }
+
+    // 모든 학과 조회 - 학생 정보 제외, 별도 카운트 조회
     public List<DepartmentDTO.SimpleResponse> getAllDepartments() {
-        return departmentRepository.findAll()
-                .stream()
-                .map(DepartmentDTO.SimpleResponse::fromEntity)
+        List<Department> departments = departmentRepository.findAll();
+
+        return departments.stream()
+                .map(department -> {
+                    // 학생 수만 별도로 조회하여 students 컬렉션에 접근하지 않음
+                    Long studentCount = studentRepository.countByDepartmentId(department.getId());
+                    return DepartmentDTO.SimpleResponse.builder()
+                            .id(department.getId())
+                            .name(department.getName())
+                            .code(department.getCode())
+                            .studentCount(studentCount)
+                            .build();
+                })
                 .toList();
     }
+
 
     public DepartmentDTO.Response getDepartmentById(Long id) {
         Department department = departmentRepository.findByIdWithStudents(id)
