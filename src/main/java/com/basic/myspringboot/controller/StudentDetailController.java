@@ -1,7 +1,7 @@
 package com.basic.myspringboot.controller;
 
 import com.basic.myspringboot.controller.dto.StudentDTO;
-import com.basic.myspringboot.service.StudentService;
+import com.basic.myspringboot.service.StudentDetailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,11 +12,11 @@ import java.util.List;
 
 //StudentController 클래스
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/api/students/detail")
 @RequiredArgsConstructor
-public class StudentController {
+public class StudentDetailController {
 
-    private final StudentService studentService;
+    private final StudentDetailService studentService;
 
     @GetMapping
     public ResponseEntity<List<StudentDTO.Response>> getAllStudents() {
