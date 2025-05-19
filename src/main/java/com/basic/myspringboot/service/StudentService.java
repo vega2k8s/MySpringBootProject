@@ -87,6 +87,7 @@ public class StudentService {
         Student student = Student.builder()
                 .name(request.getName())
                 .studentNumber(request.getStudentNumber())
+                //Student 와 Department 연관관계 저장
                 .department(department)
                 .build();
 
@@ -97,9 +98,11 @@ public class StudentService {
                     .phoneNumber(request.getDetailRequest().getPhoneNumber())
                     .email(request.getDetailRequest().getEmail())
                     .dateOfBirth(request.getDetailRequest().getDateOfBirth())
+                    //StudentDetail 과 Student 연관관계 저장
                     .student(student)
                     .build();
 
+            //Student 와 StudentDetail 연관관계 저장
             student.setStudentDetail(studentDetail);
         }
 
@@ -137,8 +140,10 @@ public class StudentService {
             StudentDetail studentDetail = student.getStudentDetail();
 
             // Create new detail if not exists
+            // StudentDetail 가 없어서 새롭게 StudentDetail 를 저장하는 경우 
             if (studentDetail == null) {
                 studentDetail = new StudentDetail();
+                //양방향 연관관계 저장
                 studentDetail.setStudent(student);
                 student.setStudentDetail(studentDetail);
             }
@@ -155,6 +160,7 @@ public class StudentService {
                         request.getDetailRequest().getPhoneNumber());
             }
 
+            // StudentDetail 가 있고, StudentDetail 를 수정하는 경우 
             // Update detail fields
             studentDetail.setAddress(request.getDetailRequest().getAddress());
             studentDetail.setPhoneNumber(request.getDetailRequest().getPhoneNumber());
