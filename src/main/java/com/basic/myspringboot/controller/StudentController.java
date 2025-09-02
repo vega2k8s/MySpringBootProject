@@ -4,6 +4,10 @@ import com.basic.myspringboot.controller.dto.StudentDTO;
 import com.basic.myspringboot.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +21,16 @@ public class StudentController {
 
     private final StudentService studentService;
 
+    // 페이징 처리된 학생 목록 조회
+    @GetMapping("/paged")
+    public ResponseEntity<Page<StudentDTO.Response>> getAllStudentsPaged(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC)
+            Pageable pageable) {
+        Page<StudentDTO.Response> students = studentService.getAllStudents(pageable);
+        return ResponseEntity.ok(students);
+    }
+
+    // 페이징 처리 없는 학생 목록 조회
     @GetMapping
     public ResponseEntity<List<StudentDTO.Response>> getAllStudents() {
         List<StudentDTO.Response> students = studentService.getAllStudents();

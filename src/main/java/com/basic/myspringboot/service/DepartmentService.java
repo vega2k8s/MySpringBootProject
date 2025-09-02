@@ -29,7 +29,7 @@ public class DepartmentService {
 //                .toList();
 //    }
 
-    // 모든 학과 조회 - 학생 정보 제외, 별도 카운트 조회
+    // 페이징 처리없는 모든 학과 조회 - 학생 정보 제외, 별도 카운트 조회
     public List<DepartmentDTO.SimpleResponse> getAllDepartments() {
         List<Department> departments = departmentRepository.findAll();
 
@@ -62,7 +62,6 @@ public class DepartmentService {
                     .build();
         });
     }
-
 
     public DepartmentDTO.Response getDepartmentById(Long id) {
         Department department = departmentRepository.findByIdWithStudents(id)
