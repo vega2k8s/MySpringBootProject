@@ -1,6 +1,8 @@
 package com.basic.myspringboot.repository;
 
 import com.basic.myspringboot.entity.Student;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,4 +32,16 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Long countByDepartmentId(@Param("departmentId") Long departmentId);
 
 
+    // 부서별 학생 조회 (페이징)
+    Page<Student> findByDepartmentId(Long departmentId, Pageable pageable);
+
+    // 학생 이름으로 검색 (페이징)
+    Page<Student> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    // 학생 번호로 검색 (페이징)
+    Page<Student> findByStudentNumberContainingIgnoreCase(String studentNumber, Pageable pageable);
+
+    // 부서별 + 이름 검색 (페이징)
+    Page<Student> findByDepartmentIdAndNameContainingIgnoreCase(Long departmentId,
+                                                                String name, Pageable pageable);
 }

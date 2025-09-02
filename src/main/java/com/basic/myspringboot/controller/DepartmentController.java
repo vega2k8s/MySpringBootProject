@@ -6,6 +6,10 @@ import com.basic.myspringboot.service.DepartmentService;
 import com.basic.myspringboot.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,15 @@ public class DepartmentController {
     private final DepartmentService departmentService;
     private final StudentService studentService;
 
+    // 페이징 처리된 학과 목록 조회
+    @GetMapping("/paged")
+    public ResponseEntity<Page<DepartmentDTO.SimpleResponse>> getAllDepartmentsPaged(
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<DepartmentDTO.SimpleResponse> departments = departmentService.getAllDepartments(pageable);
+        return ResponseEntity.ok(departments);
+    }
+
+    // 기존 메서드 유지 (페이징 없는 버전)
     @GetMapping
     public ResponseEntity<List<DepartmentDTO.SimpleResponse>> getAllDepartments() {
         List<DepartmentDTO.SimpleResponse> departments = departmentService.getAllDepartments();
