@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component
-@Order(1)
+@Order(2)
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitRunner implements CommandLineRunner {

@@ -1,5 +1,6 @@
 package com.basic.myspringboot.entity;
 
+import com.basic.myspringboot.security.models.UserInfo;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,4 +36,9 @@ public class Student {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="department_id")
     private Department department;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_info_id")
+    private UserInfo userInfo;
+
 }
