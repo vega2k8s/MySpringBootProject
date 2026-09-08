@@ -117,16 +117,10 @@ public class StudentService {
             //Student가 연관된 StudentDetail 객체를 가져오기
             StudentDetail studentDetail = student.getStudentDetail();
 
-            // Create new detail if not exists ( 저장된 StudentDetail 정보가 없을 경우 )
-            if (studentDetail == null) {
-                // 새로운 StudentDetail 객체생성
-                studentDetail = new StudentDetail();
-                //연관된 Student 객체 저장
-                studentDetail.setStudent(student);
-                //연관된 StudenDetail 객체 저장
-                student.setStudentDetail(studentDetail);
-            }
-
+            // 중복 검사를 먼저 수행한다.
+            // 검사용 조회 쿼리가 실행되면 영속성 컨텍스트가 flush 되는데,
+            // 값이 채워지지 않은 StudentDetail 을 먼저 연결해 두면
+            // address 등 NOT NULL 컬럼에 null 이 들어가 제약조건 위반이 발생한다.
             // Validate email is not already in use (if changing)
             if (isEmailChangingAndExists(studentDetail, request.getDetailRequest())) {
                 throw new BusinessException(ErrorCode.EMAIL_DUPLICATE,
@@ -137,6 +131,16 @@ public class StudentService {
             if (isPhoneNumberChangingAndExists(studentDetail, request.getDetailRequest())) {
                 throw new BusinessException(ErrorCode.PHONE_NUMBER_DUPLICATE,
                         request.getDetailRequest().getPhoneNumber());
+            }
+
+            // Create new detail if not exists ( 저장된 StudentDetail 정보가 없을 경우 )
+            if (studentDetail == null) {
+                // 새로운 StudentDetail 객체생성
+                studentDetail = new StudentDetail();
+                //연관된 Student 객체 저장
+                studentDetail.setStudent(student);
+                //연관된 StudenDetail 객체 저장
+                student.setStudentDetail(studentDetail);
             }
 
             // Update detail fields
@@ -176,17 +180,20 @@ public class StudentService {
 
     private boolean isEmailChangingAndExists(StudentDetail currentDetail,
                                              StudentDTO.StudentDetailDTO newDetail) {
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentEmail = currentDetail == null ? null : currentDetail.getEmail();
         return newDetail.getEmail() != null &&
                 !newDetail.getEmail().isEmpty() &&
-                (currentDetail.getEmail() == null ||
-                        !currentDetail.getEmail().equals(newDetail.getEmail())) &&
+                (currentEmail == null || !currentEmail.equals(newDetail.getEmail())) &&
                 studentDetailRepository.existsByEmail(newDetail.getEmail());
     }
 
     private boolean isPhoneNumberChangingAndExists(StudentDetail currentDetail,
                                                    StudentDTO.StudentDetailDTO newDetail) {
-        return (currentDetail.getPhoneNumber() == null ||
-                !currentDetail.getPhoneNumber().equals(newDetail.getPhoneNumber())) &&
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentPhone = currentDetail == null ? null : currentDetail.getPhoneNumber();
+        return (currentPhone == null ||
+                !currentPhone.equals(newDetail.getPhoneNumber())) &&
                 studentDetailRepository.existsByPhoneNumber(newDetail.getPhoneNumber());
     }
 }
