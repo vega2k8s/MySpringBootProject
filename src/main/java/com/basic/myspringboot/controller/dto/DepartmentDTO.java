@@ -63,12 +63,26 @@ public class DepartmentDTO {
         private String code;
         private Long studentCount;
 
+        /**
+         * 학과의 기본 정보만 변환한다.
+         * students 컬렉션에 접근하지 않으므로 지연로딩 추가 조회가 발생하지 않는다.
+         * 학생 수가 필요하면 {@link #fromEntity(Department, Long)} 를 사용한다.
+         */
         public static SimpleResponse fromEntity(Department department) {
+            return fromEntity(department, null);
+        }
+
+        /**
+         * 학과 정보에 별도로 조회한 학생 수를 담아 변환한다.
+         *
+         * @param studentCount COUNT 쿼리로 미리 구한 학생 수
+         */
+        public static SimpleResponse fromEntity(Department department, Long studentCount) {
             return SimpleResponse.builder()
                     .id(department.getId())
                     .name(department.getName())
                     .code(department.getCode())
-                    .studentCount((long) department.getStudents().size())
+                    .studentCount(studentCount)
                     .build();
         }
     }

@@ -12,22 +12,47 @@ import java.util.Optional;
 //StudentRepository 인터페이스
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
-    Optional<Student> findByStudentNumber(String studentNumber);
 
-    @Query("SELECT s FROM Student s JOIN FETCH s.studentDetail WHERE s.id = :id")
+    //전체 목록을 상세정보/학과와 함께 조회한다 ( findAll() 의 N+1 문제를 해결 )
+    @Query("SELECT s FROM Student s "
+            + "LEFT JOIN FETCH s.studentDetail "
+            + "LEFT JOIN FETCH s.department")
+    List<Student> findAllWithDetails();
+
+    //LEFT JOIN FETCH : 상세정보가 없는 학생도 조회되어야 하므로 외부 조인을 사용한다
+    @Query("SELECT s FROM Student s LEFT JOIN FETCH s.studentDetail WHERE s.id = :id")
     Optional<Student> findByIdWithStudentDetail(@Param("id") Long id);
 
-    boolean existsByStudentNumber(String studentNumber);
-
-    @Query("SELECT s FROM Student s LEFT JOIN FETCH s.studentDetail LEFT JOIN FETCH s.department WHERE s.id = :id")
+    //ID 로 상세정보와 학과를 한 번에 조회한다
+    @Query("SELECT s FROM Student s "
+            + "LEFT JOIN FETCH s.studentDetail "
+            + "LEFT JOIN FETCH s.department "
+            + "WHERE s.id = :id")
     Optional<Student> findByIdWithAllDetails(@Param("id") Long id);
 
-    // 새로 추가된 메서드
-    List<Student> findByDepartmentId(Long departmentId);
+    //학번으로 조회할 때에도 상세정보/학과를 함께 가져와 쿼리 1번으로 처리한다
+    @Query("SELECT s FROM Student s "
+            + "LEFT JOIN FETCH s.studentDetail "
+            + "LEFT JOIN FETCH s.department "
+            + "WHERE s.studentNumber = :studentNumber")
+    Optional<Student> findByStudentNumber(@Param("studentNumber") String studentNumber);
 
-    // 새로 추가된 메서드
+    //학과별 학생 목록도 상세정보/학과를 함께 조회한다
+    @Query("SELECT s FROM Student s "
+            + "LEFT JOIN FETCH s.studentDetail "
+            + "LEFT JOIN FETCH s.department "
+            + "WHERE s.department.id = :departmentId")
+    List<Student> findByDepartmentId(@Param("departmentId") Long departmentId);
+
+    //학과별 학생 수 ( 학과 하나를 대상으로 할 때 사용 )
     @Query("SELECT COUNT(s) FROM Student s WHERE s.department.id = :departmentId")
     Long countByDepartmentId(@Param("departmentId") Long departmentId);
 
+    //전체 학과의 학생 수를 한 번의 쿼리로 집계한다 ( 학과 수만큼 COUNT 를 날리지 않기 위함 )
+    //반환값은 [학과ID, 학생수] 형태의 배열 목록이다
+    @Query("SELECT s.department.id, COUNT(s) FROM Student s "
+            + "WHERE s.department IS NOT NULL GROUP BY s.department.id")
+    List<Object[]> countGroupByDepartmentId();
 
+    boolean existsByStudentNumber(String studentNumber);
 }

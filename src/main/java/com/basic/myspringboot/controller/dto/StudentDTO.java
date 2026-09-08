@@ -65,8 +65,19 @@ public class StudentDTO {
         private StudentDetailResponse detail;
 
         public static Response fromEntity(Student student) {
+            return fromEntity(student, null);
+        }
+
+        /**
+         * 학생 엔티티를 응답 DTO 로 변환한다.
+         *
+         * @param departmentStudentCount COUNT 쿼리로 미리 구한 소속 학과의 학생 수.
+         *                               학과의 students 컬렉션을 로딩하지 않기 위해 값을 받아서 사용한다.
+         */
+        public static Response fromEntity(Student student, Long departmentStudentCount) {
             DepartmentDTO.SimpleResponse departmentResponse = student.getDepartment() != null
-                    ? DepartmentDTO.SimpleResponse.fromEntity(student.getDepartment())
+                    ? DepartmentDTO.SimpleResponse.fromEntity(student.getDepartment(),
+                                                              departmentStudentCount)
                     : null;
 
             StudentDetailResponse detailResponse = student.getStudentDetail() != null

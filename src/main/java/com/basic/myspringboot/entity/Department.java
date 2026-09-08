@@ -35,15 +35,4 @@ public class Department {
     //빌더패턴을 적용했을때 변수에 명시적으로 초기화 한 값이 유지 되도록 해주는 어노테이션
     @Builder.Default
     private List<Student> students = new ArrayList<>();
-    
-    // Helper methods
-    public void addStudent(Student student) {
-        students.add(student);
-        student.setDepartment(this);
-    }
-    
-    public void removeStudent(Student student) {
-        students.remove(student);
-        student.setDepartment(null);
-    }
 }

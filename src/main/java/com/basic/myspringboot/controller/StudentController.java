@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//StudentController 클래스
 @RestController
 @RequestMapping("/api/students")
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<StudentDTO.Response> createStudent(@Valid @RequestBody StudentDTO.Request request) {
         StudentDTO.Response createdStudent = studentService.createStudent(request);
+        //HttpStatus.CREATED - 201
         return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
     }
 

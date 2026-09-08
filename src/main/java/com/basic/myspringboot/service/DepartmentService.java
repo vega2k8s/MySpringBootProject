@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,21 +29,21 @@ public class DepartmentService {
 //                .toList();
 //    }
 
-    // 모든 학과 조회 - 학생 정보 제외, 별도 카운트 조회
+    // 모든 학과 조회 - 학생 정보 제외, 학생 수는 한 번의 집계 쿼리로 구한다
     public List<DepartmentDTO.SimpleResponse> getAllDepartments() {
         List<Department> departments = departmentRepository.findAll();
 
+        // 학과마다 COUNT 를 날리면 학과 수만큼 쿼리가 발생하므로( N+1 ),
+        // GROUP BY 로 한 번에 집계한 뒤 Map 으로 만들어 사용한다
+        Map<Long, Long> countByDepartmentId = studentRepository.countGroupByDepartmentId()
+                .stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
         return departments.stream()
-                .map(department -> {
-                    // 학생 수만 별도로 조회하여 students 컬렉션에 접근하지 않음
-                    Long studentCount = studentRepository.countByDepartmentId(department.getId());
-                    return DepartmentDTO.SimpleResponse.builder()
-                            .id(department.getId())
-                            .name(department.getName())
-                            .code(department.getCode())
-                            .studentCount(studentCount)
-                            .build();
-                })
+                .map(department -> DepartmentDTO.SimpleResponse.fromEntity(
+                        department,
+                        // 학생이 한 명도 없는 학과는 집계 결과에 없으므로 0 으로 처리한다
+                        countByDepartmentId.getOrDefault(department.getId(), 0L)))
                 .toList();
     }
 
@@ -54,7 +56,7 @@ public class DepartmentService {
     }
 
     public DepartmentDTO.Response getDepartmentByCode(String code) {
-        Department department = departmentRepository.findByCode(code)
+        Department department = departmentRepository.findByCodeWithStudents(code)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         "Department", "code", code));
         return DepartmentDTO.Response.fromEntity(department);
