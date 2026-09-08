@@ -1,5 +1,6 @@
 //ErrorCode enum 상수정의
 package com.basic.myspringboot.exception;
+
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;

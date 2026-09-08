@@ -49,10 +49,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Long countByDepartmentId(@Param("departmentId") Long departmentId);
 
     //전체 학과의 학생 수를 한 번의 쿼리로 집계한다 ( 학과 수만큼 COUNT 를 날리지 않기 위함 )
-    //반환값은 [학과ID, 학생수] 형태의 배열 목록이다
-    @Query("SELECT s.department.id, COUNT(s) FROM Student s "
-            + "WHERE s.department IS NOT NULL GROUP BY s.department.id")
-    List<Object[]> countGroupByDepartmentId();
+    //AS 별칭이 DepartmentStudentCount 의 메서드 이름과 짝을 이룬다
+    @Query("SELECT s.department.id AS departmentId, COUNT(s) AS studentCount "
+            + "FROM Student s WHERE s.department IS NOT NULL GROUP BY s.department.id")
+    List<DepartmentStudentCount> countGroupByDepartmentId();
 
     boolean existsByStudentNumber(String studentNumber);
 }

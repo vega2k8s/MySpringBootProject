@@ -5,6 +5,7 @@ import com.basic.myspringboot.entity.Student;
 import com.basic.myspringboot.entity.StudentDetail;
 import com.basic.myspringboot.repository.DepartmentRepository;
 import com.basic.myspringboot.repository.StudentRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

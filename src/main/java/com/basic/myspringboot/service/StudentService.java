@@ -8,14 +8,16 @@ import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.exception.ErrorCode;
 import com.basic.myspringboot.repository.DepartmentRepository;
 import com.basic.myspringboot.repository.StudentDetailRepository;
+import com.basic.myspringboot.repository.DepartmentStudentCount;
 import com.basic.myspringboot.repository.StudentRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -237,11 +239,16 @@ public class StudentService {
                 : studentRepository.countByDepartmentId(student.getDepartment().getId());
     }
 
-    /** 전체 학과의 학생 수를 한 번의 집계 쿼리로 구한다. */
+    /**
+     * 전체 학과의 학생 수를 한 번의 집계 쿼리로 구해
+     * "학과ID -> 학생수" 형태의 Map 으로 만든다.
+     */
     private Map<Long, Long> studentCountByDepartmentId() {
-        return studentRepository.countGroupByDepartmentId()
-                .stream()
-                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+        Map<Long, Long> countByDepartmentId = new HashMap<>();
+        for (DepartmentStudentCount row : studentRepository.countGroupByDepartmentId()) {
+            countByDepartmentId.put(row.getDepartmentId(), row.getStudentCount());
+        }
+        return countByDepartmentId;
     }
 
     /** 집계 결과에서 해당 학생의 학과 학생 수를 꺼낸다. */

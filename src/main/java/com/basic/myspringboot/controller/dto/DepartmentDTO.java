@@ -1,6 +1,7 @@
 package com.basic.myspringboot.controller.dto;
 
 import com.basic.myspringboot.entity.Department;
+import com.basic.myspringboot.repository.DepartmentSummary;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -70,6 +71,20 @@ public class DepartmentDTO {
          */
         public static SimpleResponse fromEntity(Department department) {
             return fromEntity(department, null);
+        }
+
+        /**
+         * 학과 정보와 학생 수를 함께 조회한 결과를 변환한다.
+         *
+         * @param summary 학과 정보와 학생 수가 함께 담긴 조회 결과
+         */
+        public static SimpleResponse fromSummary(DepartmentSummary summary) {
+            return SimpleResponse.builder()
+                    .id(summary.getId())
+                    .name(summary.getName())
+                    .code(summary.getCode())
+                    .studentCount(summary.getStudentCount())
+                    .build();
         }
 
         /**

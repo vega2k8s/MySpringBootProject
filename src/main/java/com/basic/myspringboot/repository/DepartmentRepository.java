@@ -6,12 +6,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
     
     Optional<Department> findByCode(String code);
+
+    //학과 목록과 학생 수를 한 번의 쿼리로 함께 조회한다.
+    //LEFT JOIN 이므로 학생이 없는 학과도 studentCount = 0 으로 조회된다.
+    //AS 별칭이 DepartmentSummary 의 메서드 이름과 짝을 이룬다.
+    @Query("SELECT d.id AS id, d.name AS name, d.code AS code, COUNT(s) AS studentCount "
+            + "FROM Department d LEFT JOIN d.students s "
+            + "GROUP BY d.id, d.name, d.code ORDER BY d.id")
+    List<DepartmentSummary> findAllSummaries();
     
     //학생의 studentDetail 까지 함께 가져온다.
     //Student.studentDetail 은 mappedBy 쪽 @OneToOne 이라 LAZY 가 동작하지 않고,
