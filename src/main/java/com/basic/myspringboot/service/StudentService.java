@@ -144,7 +144,7 @@ public class StudentService {
             // 중복 검사를 먼저 수행한다.
             // 검사용 조회 쿼리가 실행되면 영속성 컨텍스트가 flush 되는데,
             // 값이 채워지지 않은 StudentDetail 을 먼저 연결해 두면
-            // address 등 NOT NULL 컬럼에 null 이 들어가 제약조건 위반이 발생한다.
+            // email, phoneNumber 등 NOT NULL 컬럼에 null 이 들어가 제약조건 위반이 발생한다.
             // Validate email is not already in use (if changing)
             if (isEmailChangingAndExists(studentDetail, request.getDetailRequest())) {
                 throw new BusinessException(ErrorCode.EMAIL_DUPLICATE,
@@ -218,7 +218,5 @@ public class StudentService {
         return !newDetail.getPhoneNumber().equals(currentPhone) &&
                 studentDetailRepository.existsByPhoneNumber(newDetail.getPhoneNumber());
     }
-
-
 
 }

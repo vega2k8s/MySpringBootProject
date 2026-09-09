@@ -1,6 +1,7 @@
 package com.basic.myspringboot.controller.dto;
 
 import com.basic.myspringboot.entity.Department;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.basic.myspringboot.repository.DepartmentSummary;
 import jakarta.validation.constraints.NotBlank;
