@@ -8,16 +8,13 @@ import com.basic.myspringboot.exception.BusinessException;
 import com.basic.myspringboot.exception.ErrorCode;
 import com.basic.myspringboot.repository.DepartmentRepository;
 import com.basic.myspringboot.repository.StudentDetailRepository;
-import com.basic.myspringboot.repository.DepartmentStudentCount;
 import com.basic.myspringboot.repository.StudentRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +27,9 @@ public class StudentService {
 
     public List<StudentDTO.Response> getAllStudents() {
         //findAll() 대신 Fetch Join 을 사용하여 N+1 문제를 해결한다
-        List<Student> students = studentRepository.findAllWithDetails();
-        //학과별 학생 수는 학과마다 COUNT 를 날리지 않도록 한 번에 집계한다
-        Map<Long, Long> countByDepartmentId = studentCountByDepartmentId();
-
-        return students.stream()
-                .map(student -> StudentDTO.Response.fromEntity(
-                        student, countOf(countByDepartmentId, student)))
+        return studentRepository.findAllWithDetails()
+                .stream()
+                .map(StudentDTO.Response::fromEntity)
                 .toList();
     }
 
@@ -44,14 +37,14 @@ public class StudentService {
         Student student = studentRepository.findByIdWithAllDetails(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         "Student", "id", id));
-        return StudentDTO.Response.fromEntity(student, departmentStudentCount(student));
+        return StudentDTO.Response.fromEntity(student);
     }
 
     public StudentDTO.Response getStudentByStudentNumber(String studentNumber) {
         Student student = studentRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         "Student", "student number", studentNumber));
-        return StudentDTO.Response.fromEntity(student, departmentStudentCount(student));
+        return StudentDTO.Response.fromEntity(student);
     }
 
     public List<StudentDTO.Response> getStudentsByDepartmentId(Long departmentId) {
@@ -61,12 +54,9 @@ public class StudentService {
                     "Department", "id", departmentId);
         }
 
-        //학과가 하나로 정해져 있으므로 COUNT 쿼리 1번이면 충분하다
-        Long studentCount = studentRepository.countByDepartmentId(departmentId);
-
         return studentRepository.findByDepartmentId(departmentId)
                 .stream()
-                .map(student -> StudentDTO.Response.fromEntity(student, studentCount))
+                .map(StudentDTO.Response::fromEntity)
                 .toList();
     }
 
@@ -120,7 +110,7 @@ public class StudentService {
 
         // Save and return the student
         Student savedStudent = studentRepository.save(student);
-        return StudentDTO.Response.fromEntity(savedStudent, departmentStudentCount(savedStudent));
+        return StudentDTO.Response.fromEntity(savedStudent);
     }
 
     @Transactional
@@ -186,7 +176,7 @@ public class StudentService {
 
         // Save and return updated student
         Student updatedStudent = studentRepository.save(student);
-        return StudentDTO.Response.fromEntity(updatedStudent, departmentStudentCount(updatedStudent));
+        return StudentDTO.Response.fromEntity(updatedStudent);
     }
 
     @Transactional
@@ -201,9 +191,8 @@ public class StudentService {
     // Helper methods to improve readability and reduce duplication
 
     private boolean hasEmailAndExists(StudentDTO.StudentDetailDTO detailRequest) {
+        //email 은 @NotBlank 로 검증되므로 null / 빈 문자열 검사는 필요 없다
         return detailRequest != null &&
-                detailRequest.getEmail() != null &&
-                !detailRequest.getEmail().isEmpty() &&
                 studentDetailRepository.existsByEmail(detailRequest.getEmail());
     }
 
@@ -215,46 +204,21 @@ public class StudentService {
     private boolean isEmailChangingAndExists(StudentDetail currentDetail, StudentDTO.StudentDetailDTO newDetail) {
         //상세정보가 아직 없는 경우 currentDetail 은 null 이다
         String currentEmail = currentDetail == null ? null : currentDetail.getEmail();
-        return newDetail.getEmail() != null &&
-                !newDetail.getEmail().isEmpty() &&
-                (currentEmail == null || !currentEmail.equals(newDetail.getEmail())) &&
+        //email 은 @NotBlank 로 검증되므로 null / 빈 문자열 검사는 필요 없다
+        //값이 실제로 바뀔 때만 중복을 검사한다 ( 자기 자신의 값은 중복이 아니다 )
+        return !newDetail.getEmail().equals(currentEmail) &&
                 studentDetailRepository.existsByEmail(newDetail.getEmail());
     }
 
     private boolean isPhoneNumberChangingAndExists(StudentDetail currentDetail, StudentDTO.StudentDetailDTO newDetail) {
         //상세정보가 아직 없는 경우 currentDetail 은 null 이다
         String currentPhone = currentDetail == null ? null : currentDetail.getPhoneNumber();
-        return (currentPhone == null ||
-                !currentPhone.equals(newDetail.getPhoneNumber())) &&
+        //phoneNumber 는 @NotBlank 로 검증되므로 null 검사는 필요 없다
+        //값이 실제로 바뀔 때만 중복을 검사한다 ( 자기 자신의 값은 중복이 아니다 )
+        return !newDetail.getPhoneNumber().equals(currentPhone) &&
                 studentDetailRepository.existsByPhoneNumber(newDetail.getPhoneNumber());
     }
 
-    /**
-     * 학생이 속한 학과의 학생 수를 COUNT 쿼리로 구한다.
-     * 학과의 students 컬렉션을 통째로 로딩하지 않기 위한 것이다.
-     */
-    private Long departmentStudentCount(Student student) {
-        return student.getDepartment() == null
-                ? null
-                : studentRepository.countByDepartmentId(student.getDepartment().getId());
-    }
 
-    /**
-     * 전체 학과의 학생 수를 한 번의 집계 쿼리로 구해
-     * "학과ID -> 학생수" 형태의 Map 으로 만든다.
-     */
-    private Map<Long, Long> studentCountByDepartmentId() {
-        Map<Long, Long> countByDepartmentId = new HashMap<>();
-        for (DepartmentStudentCount row : studentRepository.countGroupByDepartmentId()) {
-            countByDepartmentId.put(row.getDepartmentId(), row.getStudentCount());
-        }
-        return countByDepartmentId;
-    }
 
-    /** 집계 결과에서 해당 학생의 학과 학생 수를 꺼낸다. */
-    private Long countOf(Map<Long, Long> countByDepartmentId, Student student) {
-        return student.getDepartment() == null
-                ? null
-                : countByDepartmentId.getOrDefault(student.getDepartment().getId(), 0L);
-    }
 }

@@ -29,6 +29,9 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
             + "LEFT JOIN FETCH d.students s "
             + "LEFT JOIN FETCH s.studentDetail "
             + "WHERE d.id = :id")
+//    @Query("SELECT d FROM Department d "
+//            + "LEFT JOIN FETCH d.students s "
+//            + "WHERE d.id = :id")
     Optional<Department> findByIdWithStudents(@Param("id") Long id);
 
     //학과코드로 조회할 때에도 소속 학생을 함께 가져온다 ( 지연로딩 추가 조회를 없앤다 )

@@ -1,6 +1,7 @@
 package com.basic.myspringboot.controller.dto;
 
 import com.basic.myspringboot.entity.Department;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.basic.myspringboot.repository.DepartmentSummary;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -58,6 +59,8 @@ public class DepartmentDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    //studentCount 가 없을 때( 학생 응답 안에 포함될 때 ) 필드를 아예 내보내지 않는다
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SimpleResponse {
         private Long id;
         private String name;
@@ -67,10 +70,14 @@ public class DepartmentDTO {
         /**
          * 학과의 기본 정보만 변환한다.
          * students 컬렉션에 접근하지 않으므로 지연로딩 추가 조회가 발생하지 않는다.
-         * 학생 수가 필요하면 {@link #fromEntity(Department, Long)} 를 사용한다.
+         * studentCount 는 채우지 않으므로 응답 JSON 에 나타나지 않는다.
          */
         public static SimpleResponse fromEntity(Department department) {
-            return fromEntity(department, null);
+            return SimpleResponse.builder()
+                    .id(department.getId())
+                    .name(department.getName())
+                    .code(department.getCode())
+                    .build();
         }
 
         /**
@@ -84,20 +91,6 @@ public class DepartmentDTO {
                     .name(summary.getName())
                     .code(summary.getCode())
                     .studentCount(summary.getStudentCount())
-                    .build();
-        }
-
-        /**
-         * 학과 정보에 별도로 조회한 학생 수를 담아 변환한다.
-         *
-         * @param studentCount COUNT 쿼리로 미리 구한 학생 수
-         */
-        public static SimpleResponse fromEntity(Department department, Long studentCount) {
-            return SimpleResponse.builder()
-                    .id(department.getId())
-                    .name(department.getName())
-                    .code(department.getCode())
-                    .studentCount(studentCount)
                     .build();
         }
     }
