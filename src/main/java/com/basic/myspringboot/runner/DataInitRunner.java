@@ -130,6 +130,13 @@ public class DataInitRunner implements CommandLineRunner {
                 LocalDate.of(1998, 9, 10)
         );
 
+        // Student without detail (Computer Science)
+//        Student student8 = Student.builder()
+//                .name("Helen Lee")
+//                .studentNumber("CS003")
+//                .department(cs)
+//                .build();
+
         //email과 phonenumber 만 가진 StuentDetail 객체생성하기
         StudentDetail detail8 = StudentDetail.builder()
                 .phoneNumber("010-6789-0789")
@@ -141,6 +148,7 @@ public class DataInitRunner implements CommandLineRunner {
                 .name("Helen Lee")
                 .studentNumber("CS003")
                 .studentDetail(detail8)
+                .department(cs)
                 .build();
 
         detail8.setStudent(student8);
