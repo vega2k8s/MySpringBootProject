@@ -21,13 +21,12 @@ public class StudentDetail {
     @Column(name = "student_detail_id")
     private Long id;
     
-    @Column(nullable = false)
     private String address;
     
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String phoneNumber;
     
-    @Column
+    @Column(nullable = false, unique = true)
     private String email;
     
     @Column
