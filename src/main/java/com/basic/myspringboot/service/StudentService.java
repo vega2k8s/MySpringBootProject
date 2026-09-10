@@ -28,13 +28,15 @@ public class StudentService {
 
     // 페이징 처리된 모든 학생 조회
     public Page<StudentDTO.Response> getAllStudents(Pageable pageable) {
-        Page<Student> students = studentRepository.findAll(pageable);
+        //findAll() 대신 Fetch Join 을 사용하여 N+1 문제를 해결한다
+        Page<Student> students = studentRepository.findAllWithDetails(pageable);
         return students.map(StudentDTO.Response::fromEntity);
     }
 
     // 페이징 처리 없는 모든 학생 조회
     public List<StudentDTO.Response> getAllStudents() {
-        return studentRepository.findAll()
+        //findAll() 대신 Fetch Join 을 사용하여 N+1 문제를 해결한다
+        return studentRepository.findAllWithDetails()
                 .stream()
                 .map(StudentDTO.Response::fromEntity)
                 .toList();
@@ -161,6 +163,16 @@ public class StudentService {
         if (request.getDetailRequest() != null) {
             StudentDetail studentDetail = student.getStudentDetail();
 
+            // 중복 검사를 먼저 수행한다.
+            // 검사용 조회 쿼리가 실행되면 영속성 컨텍스트가 flush 되는데,
+            // 값이 채워지지 않은 StudentDetail 을 먼저 연결해 두면
+            // address 등 NOT NULL 컬럼에 null 이 들어가 제약조건 위반이 발생한다.
+            // Validate email is not already in use (if changing)
+            if (isEmailChangingAndExists(studentDetail, request.getDetailRequest())) {
+                throw new BusinessException(ErrorCode.EMAIL_DUPLICATE,
+                        request.getDetailRequest().getEmail());
+            }
+
             // Create new detail if not exists
             // StudentDetail 가 없어서 새롭게 StudentDetail 를 저장하는 경우 
             if (studentDetail == null) {
@@ -168,12 +180,6 @@ public class StudentService {
                 //양방향 연관관계 저장
                 studentDetail.setStudent(student);
                 student.setStudentDetail(studentDetail);
-            }
-
-            // Validate email is not already in use (if changing)
-            if (isEmailChangingAndExists(studentDetail, request.getDetailRequest())) {
-                throw new BusinessException(ErrorCode.EMAIL_DUPLICATE,
-                        request.getDetailRequest().getEmail());
             }
 
             // Validate phone number is not already in use (if changing)
@@ -219,16 +225,19 @@ public class StudentService {
     }
 
     private boolean isEmailChangingAndExists(StudentDetail currentDetail, StudentDTO.StudentDetailDTO newDetail) {
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentEmail = currentDetail == null ? null : currentDetail.getEmail();
         return newDetail.getEmail() != null &&
                 !newDetail.getEmail().isEmpty() &&
-                (currentDetail.getEmail() == null ||
-                        !currentDetail.getEmail().equals(newDetail.getEmail())) &&
+                (currentEmail == null || !currentEmail.equals(newDetail.getEmail())) &&
                 studentDetailRepository.existsByEmail(newDetail.getEmail());
     }
 
     private boolean isPhoneNumberChangingAndExists(StudentDetail currentDetail, StudentDTO.StudentDetailDTO newDetail) {
-        return (currentDetail.getPhoneNumber() == null ||
-                !currentDetail.getPhoneNumber().equals(newDetail.getPhoneNumber())) &&
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentPhone = currentDetail == null ? null : currentDetail.getPhoneNumber();
+        return (currentPhone == null ||
+                !currentPhone.equals(newDetail.getPhoneNumber())) &&
                 studentDetailRepository.existsByPhoneNumber(newDetail.getPhoneNumber());
     }
 }

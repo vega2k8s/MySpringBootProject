@@ -29,38 +29,19 @@ public class DepartmentService {
 //                .toList();
 //    }
 
-    // 페이징 처리없는 모든 학과 조회 - 학생 정보 제외, 별도 카운트 조회
+    // 모든 학과 조회 - 학과 정보와 학생 수를 한 번의 쿼리로 함께 가져온다
     public List<DepartmentDTO.SimpleResponse> getAllDepartments() {
-        List<Department> departments = departmentRepository.findAll();
-
-        return departments.stream()
-                .map(department -> {
-                    // 학생 수만 별도로 조회하여 students 컬렉션에 접근하지 않음
-                    Long studentCount = studentRepository.countByDepartmentId(department.getId());
-                    return DepartmentDTO.SimpleResponse.builder()
-                            .id(department.getId())
-                            .name(department.getName())
-                            .code(department.getCode())
-                            .studentCount(studentCount)
-                            .build();
-                })
+        return departmentRepository.findAllSummaries()
+                .stream()
+                .map(DepartmentDTO.SimpleResponse::fromSummary)
                 .toList();
     }
 
     // 페이징 처리된 모든 학과 조회
+    // 페이징 처리된 학과 조회 - 학과마다 COUNT 를 날리지 않고 집계 쿼리 한 번으로 처리한다
     public Page<DepartmentDTO.SimpleResponse> getAllDepartments(Pageable pageable) {
-        Page<Department> departments = departmentRepository.findAll(pageable);
-
-        return departments.map(department -> {
-            // 학생 수만 별도로 조회하여 students 컬렉션에 접근하지 않음
-            Long studentCount = studentRepository.countByDepartmentId(department.getId());
-            return DepartmentDTO.SimpleResponse.builder()
-                    .id(department.getId())
-                    .name(department.getName())
-                    .code(department.getCode())
-                    .studentCount(studentCount)
-                    .build();
-        });
+        return departmentRepository.findAllSummaries(pageable)
+                .map(DepartmentDTO.SimpleResponse::fromSummary);
     }
 
     public DepartmentDTO.Response getDepartmentById(Long id) {
@@ -71,7 +52,7 @@ public class DepartmentService {
     }
 
     public DepartmentDTO.Response getDepartmentByCode(String code) {
-        Department department = departmentRepository.findByCode(code)
+        Department department = departmentRepository.findByCodeWithStudents(code)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         "Department", "code", code));
         return DepartmentDTO.Response.fromEntity(department);

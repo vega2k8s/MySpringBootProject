@@ -174,17 +174,20 @@ public class StudentDetailService {
 
     private boolean isEmailChangingAndExists(StudentDetail currentDetail,
                                              StudentDTO.StudentDetailDTO newDetail) {
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentEmail = currentDetail == null ? null : currentDetail.getEmail();
         return newDetail.getEmail() != null &&
                 !newDetail.getEmail().isEmpty() &&
-                (currentDetail.getEmail() == null ||
-                        !currentDetail.getEmail().equals(newDetail.getEmail())) &&
+                (currentEmail == null || !currentEmail.equals(newDetail.getEmail())) &&
                 studentDetailRepository.existsByEmail(newDetail.getEmail());
     }
 
     private boolean isPhoneNumberChangingAndExists(StudentDetail currentDetail,
                                                    StudentDTO.StudentDetailDTO newDetail) {
-        return (currentDetail.getPhoneNumber() == null ||
-                !currentDetail.getPhoneNumber().equals(newDetail.getPhoneNumber())) &&
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentPhone = currentDetail == null ? null : currentDetail.getPhoneNumber();
+        return (currentPhone == null ||
+                !currentPhone.equals(newDetail.getPhoneNumber())) &&
                 studentDetailRepository.existsByPhoneNumber(newDetail.getPhoneNumber());
     }
 }

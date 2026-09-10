@@ -1,6 +1,8 @@
 package com.basic.myspringboot.controller.dto;
 
 import com.basic.myspringboot.entity.Department;
+import com.basic.myspringboot.repository.DepartmentSummary;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -57,18 +59,38 @@ public class DepartmentDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    //studentCount 가 없을 때( 학생 응답 안에 포함될 때 ) 필드를 아예 내보내지 않는다
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SimpleResponse {
         private Long id;
         private String name;
         private String code;
         private Long studentCount;
 
+        /**
+         * 학과의 기본 정보만 변환한다.
+         * students 컬렉션에 접근하지 않으므로 지연로딩 추가 조회가 발생하지 않는다.
+         * studentCount 는 채우지 않으므로 응답 JSON 에 나타나지 않는다.
+         */
         public static SimpleResponse fromEntity(Department department) {
             return SimpleResponse.builder()
                     .id(department.getId())
                     .name(department.getName())
                     .code(department.getCode())
-                    .studentCount((long) department.getStudents().size())
+                    .build();
+        }
+
+        /**
+         * 학과 정보와 학생 수를 함께 조회한 결과를 변환한다.
+         *
+         * @param summary 학과 정보와 학생 수가 함께 담긴 조회 결과
+         */
+        public static SimpleResponse fromSummary(DepartmentSummary summary) {
+            return SimpleResponse.builder()
+                    .id(summary.getId())
+                    .name(summary.getName())
+                    .code(summary.getCode())
+                    .studentCount(summary.getStudentCount())
                     .build();
         }
     }
