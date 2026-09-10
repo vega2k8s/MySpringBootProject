@@ -29,7 +29,6 @@ public class Department {
     //양방향에서 Department에서 Student를 참조할 수 있도록 FK에 해당하는 필드명 mappedBy에 설정한다.
     @OneToMany(
             mappedBy = "department",
-            cascade = CascadeType.ALL,
             fetch = FetchType.LAZY
     )
     //빌더패턴을 적용했을때 변수에 명시적으로 초기화 한 값이 유지 되도록 해주는 어노테이션
