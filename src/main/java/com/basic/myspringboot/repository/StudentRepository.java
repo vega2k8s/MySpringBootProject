@@ -20,7 +20,11 @@ import java.util.Optional;
  *   반면 @OneToMany 컬렉션을 Fetch Join 하면 행이 늘어나기 때문에
  *   Pageable 과 함께 쓰면 Hibernate 가 전체를 읽어 메모리에서 페이징한다. ( 위험 )
  *
- *   @Query 에 Fetch Join 을 쓰면서 페이징할 때는 countQuery 를 직접 지정해야 한다.
+ *   [ countQuery ]
+ *   생략하면 Spring Data 가 원본 쿼리에서 FETCH 를 떼어내 count 쿼리를 자동으로 만든다.
+ *   자동 생성 SQL 이 직접 작성한 것과 같으면 지정하지 않고,
+ *   불필요한 조인/그룹핑이 남는 경우에만 지정한다.
+ *   예 ) WHERE s.department.id 조건 -> 자동 생성 count 쿼리에 departments 조인이 남는다
  */
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
@@ -34,10 +38,9 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             + "LEFT JOIN FETCH s.department")
     List<Student> findAllWithDetails();
 
-    @Query(value = "SELECT s FROM Student s "
+    @Query("SELECT s FROM Student s "
             + "LEFT JOIN FETCH s.studentDetail "
-            + "LEFT JOIN FETCH s.department",
-            countQuery = "SELECT COUNT(s) FROM Student s")
+            + "LEFT JOIN FETCH s.department")
     Page<Student> findAllWithDetails(Pageable pageable);
 
     //--------------------------------------------------------------------
@@ -71,6 +74,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
             + "WHERE s.department.id = :departmentId")
     List<Student> findByDepartmentId(@Param("departmentId") Long departmentId);
 
+    //WHERE 에 s.department 가 있어 자동 생성 count 쿼리에 departments 조인이 남으므로 직접 지정한다
     @Query(value = "SELECT s FROM Student s "
             + "LEFT JOIN FETCH s.studentDetail "
             + "LEFT JOIN FETCH s.department "
@@ -82,23 +86,20 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     // 검색 ( 페이징 )
     //--------------------------------------------------------------------
 
-    @Query(value = "SELECT s FROM Student s "
+    @Query("SELECT s FROM Student s "
             + "LEFT JOIN FETCH s.studentDetail "
             + "LEFT JOIN FETCH s.department "
-            + "WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%'))",
-            countQuery = "SELECT COUNT(s) FROM Student s "
-                    + "WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+            + "WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     Page<Student> findByNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
 
-    @Query(value = "SELECT s FROM Student s "
+    @Query("SELECT s FROM Student s "
             + "LEFT JOIN FETCH s.studentDetail "
             + "LEFT JOIN FETCH s.department "
-            + "WHERE LOWER(s.studentNumber) LIKE LOWER(CONCAT('%', :studentNumber, '%'))",
-            countQuery = "SELECT COUNT(s) FROM Student s "
-                    + "WHERE LOWER(s.studentNumber) LIKE LOWER(CONCAT('%', :studentNumber, '%'))")
+            + "WHERE LOWER(s.studentNumber) LIKE LOWER(CONCAT('%', :studentNumber, '%'))")
     Page<Student> findByStudentNumberContainingIgnoreCase(@Param("studentNumber") String studentNumber,
                                                           Pageable pageable);
 
+    //WHERE 에 s.department 가 있어 자동 생성 count 쿼리에 departments 조인이 남으므로 직접 지정한다
     @Query(value = "SELECT s FROM Student s "
             + "LEFT JOIN FETCH s.studentDetail "
             + "LEFT JOIN FETCH s.department "

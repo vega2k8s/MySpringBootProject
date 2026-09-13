@@ -21,7 +21,8 @@ public class StudentSearchService {
      */
     public Page<StudentDTO.Response> searchStudents(String keyword, Pageable pageable) {
         if (!StringUtils.hasText(keyword)) {
-            return studentRepository.findAll(pageable)
+            //findAll() 은 Fetch Join 이 없어 학생 수만큼 추가 쿼리가 발생한다 ( N+1 )
+            return studentRepository.findAllWithDetails(pageable)
                     .map(StudentDTO.Response::fromEntity);
         }
 

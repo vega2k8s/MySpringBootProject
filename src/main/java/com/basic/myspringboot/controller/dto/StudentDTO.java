@@ -2,6 +2,7 @@ package com.basic.myspringboot.controller.dto;
 
 import com.basic.myspringboot.entity.Student;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -39,14 +40,18 @@ public class StudentDTO {
     @AllArgsConstructor
     @Builder
     public static class StudentDetailDTO {
-        @NotBlank(message = "Address is required")
+        //엔티티에서 null 을 허용하는 선택 입력 항목이므로 필수 검증을 하지 않는다
         @Size(max = 200, message = "Address cannot exceed 200 characters")
         private String address;
 
+        //엔티티에서 NOT NULL, UNIQUE 이므로 필수 항목이다
         @NotBlank(message = "Phone number is required")
         @Size(max = 20, message = "Phone number cannot exceed 20 characters")
         private String phoneNumber;
 
+        //엔티티에서 NOT NULL, UNIQUE 이므로 필수이며 형식도 검증한다
+        @NotBlank(message = "Email is required")
+        @Email(message = "Email format is invalid")
         @Size(max = 100, message = "Email cannot exceed 100 characters")
         private String email;
 
