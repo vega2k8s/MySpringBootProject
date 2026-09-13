@@ -47,7 +47,8 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     // 단건 조회
     //--------------------------------------------------------------------
 
-    //LEFT JOIN FETCH : 상세정보가 없는 학생도 조회되어야 하므로 외부 조인을 사용한다
+    //LEFT JOIN FETCH : API 는 상세정보를 필수로 받지만, DB 에 직접 들어간 데이터 등
+    //                  상세정보가 없는 행이 있어도 학생 조회가 누락되지 않도록 외부 조인을 유지한다
     @Query("SELECT s FROM Student s LEFT JOIN FETCH s.studentDetail WHERE s.id = :id")
     Optional<Student> findByIdWithStudentDetail(@Param("id") Long id);
 

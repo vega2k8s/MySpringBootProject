@@ -166,9 +166,8 @@ public class StudentDetailService {
     // Helper methods to improve readability and reduce duplication
 
     private boolean hasEmailAndExists(StudentDTO.StudentDetailDTO detailRequest) {
+        //email 은 @NotBlank 로 검증되므로 null / 빈 문자열 검사는 필요 없다
         return detailRequest != null &&
-                detailRequest.getEmail() != null &&
-                !detailRequest.getEmail().isEmpty() &&
                 studentDetailRepository.existsByEmail(detailRequest.getEmail());
     }
 
@@ -181,9 +180,9 @@ public class StudentDetailService {
                                              StudentDTO.StudentDetailDTO newDetail) {
         //상세정보가 아직 없는 경우 currentDetail 은 null 이다
         String currentEmail = currentDetail == null ? null : currentDetail.getEmail();
-        return newDetail.getEmail() != null &&
-                !newDetail.getEmail().isEmpty() &&
-                (currentEmail == null || !currentEmail.equals(newDetail.getEmail())) &&
+        //email 은 @NotBlank 로 검증되므로 null / 빈 문자열 검사는 필요 없다
+        //값이 실제로 바뀔 때만 중복을 검사한다 ( 자기 자신의 값은 중복이 아니다 )
+        return !newDetail.getEmail().equals(currentEmail) &&
                 studentDetailRepository.existsByEmail(newDetail.getEmail());
     }
 
@@ -191,8 +190,9 @@ public class StudentDetailService {
                                                    StudentDTO.StudentDetailDTO newDetail) {
         //상세정보가 아직 없는 경우 currentDetail 은 null 이다
         String currentPhone = currentDetail == null ? null : currentDetail.getPhoneNumber();
-        return (currentPhone == null ||
-                !currentPhone.equals(newDetail.getPhoneNumber())) &&
+        //phoneNumber 는 @NotBlank 로 검증되므로 null 검사는 필요 없다
+        //값이 실제로 바뀔 때만 중복을 검사한다 ( 자기 자신의 값은 중복이 아니다 )
+        return !newDetail.getPhoneNumber().equals(currentPhone) &&
                 studentDetailRepository.existsByPhoneNumber(newDetail.getPhoneNumber());
     }
 }

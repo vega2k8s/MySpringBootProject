@@ -31,9 +31,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
             + "FROM Department d LEFT JOIN d.students s "
             + "GROUP BY d.id, d.name, d.code",
             countQuery = "SELECT COUNT(d) FROM Department d")
-//    @Query(value = "SELECT d.id AS id, d.name AS name, d.code AS code, COUNT(s) AS studentCount "
-//            + "FROM Department d LEFT JOIN FETCH d.students s "
-//            + "GROUP BY d.id, d.name, d.code ORDER BY d.id")
     Page<DepartmentSummary> findAllSummaries(Pageable pageable);
 
     //--------------------------------------------------------------------

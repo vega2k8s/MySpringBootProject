@@ -27,8 +27,7 @@ public class StudentDetail {
     @Column(nullable = false, unique = true)
     private String phoneNumber;
     
-    //선택 입력 항목이지만, 입력된 경우 중복될 수 없으므로 UNIQUE 제약을 준다
-    //UNIQUE 컬럼에도 null 은 여러 개 들어갈 수 있다 ( SQL 에서 null != null )
+    //중복될 수 없는 값이므로 DB 에도 UNIQUE 제약을 준다
     @Column(nullable = false, unique = true)
     private String email;
     
