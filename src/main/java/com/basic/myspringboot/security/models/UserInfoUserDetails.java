@@ -20,7 +20,11 @@ public class UserInfoUserDetails implements UserDetails {
         this.userInfo = userInfo;
         this.email=userInfo.getEmail();
         this.password=userInfo.getPassword();
-        this.authorities= Arrays.stream(userInfo.getRoles().split(","))
+        //roles 가 비어 있어도 로그인 과정에서 오류가 나지 않도록 방어한다
+        String roles = userInfo.getRoles() == null ? "" : userInfo.getRoles();
+        this.authorities = Arrays.stream(roles.split(","))
+                .map(String::trim)
+                .filter(role -> !role.isEmpty())
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }

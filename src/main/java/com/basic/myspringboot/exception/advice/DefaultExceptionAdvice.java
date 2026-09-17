@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -56,6 +58,30 @@ public class DefaultExceptionAdvice {
         result.put("httpStatus", HttpStatus.BAD_REQUEST.value());
 
         return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
+    }
+
+    //로그인 실패 ( 아이디/비밀번호 불일치 등 ) : 401
+    @ExceptionHandler(AuthenticationException.class)
+    protected ResponseEntity<ErrorObject> handleException(AuthenticationException e) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        errorObject.setMessage(e.getMessage());
+
+        log.warn("인증 실패 : {}", e.getMessage());
+
+        return new ResponseEntity<>(errorObject, HttpStatus.UNAUTHORIZED);
+    }
+
+    //권한 부족 ( @PreAuthorize 통과 실패 ) : 403
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<ErrorObject> handleException(AccessDeniedException e) {
+        ErrorObject errorObject = new ErrorObject();
+        errorObject.setStatusCode(HttpStatus.FORBIDDEN.value());
+        errorObject.setMessage(e.getMessage());
+
+        log.warn("권한 부족 : {}", e.getMessage());
+
+        return new ResponseEntity<>(errorObject, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(RuntimeException.class)

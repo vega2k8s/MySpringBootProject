@@ -10,7 +10,7 @@ import lombok.*;
 public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -21,5 +21,7 @@ public class UserInfo {
     @Column(nullable = false)
     private String password;
 
+    //"ROLE_USER" 또는 "ROLE_ADMIN,ROLE_USER" 처럼 쉼표로 구분해 저장한다
+    @Column(nullable = false)
     private String roles;
 }
