@@ -8,11 +8,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+//검색은 조회이므로 ROLE_USER 또는 ROLE_ADMIN 이면 호출할 수 있다
 @RestController
 @RequestMapping("/api/search")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
 public class StudentSearchController {
 
     private final StudentSearchService studentSearchService;

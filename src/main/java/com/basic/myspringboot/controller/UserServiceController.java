@@ -6,11 +6,15 @@ import com.basic.myspringboot.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+//UserRestController 가 같은 /api/users 경로를 test 프로파일에서 사용하므로
+//매핑이 충돌하지 않도록 이 컨트롤러는 test 프로파일에서 제외한다
+@Profile("!test")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")

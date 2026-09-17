@@ -17,9 +17,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/*
+ * [ 권한 정책 ]
+ *   조회        : ROLE_USER 또는 ROLE_ADMIN   ( 클래스에 지정 )
+ *   등록/수정/삭제 : ROLE_ADMIN                 ( 메서드에 지정하면 클래스 설정보다 우선한다 )
+ */
 @RestController
 @RequestMapping("/api/students")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
 public class StudentController {
 
     private final StudentService studentService;
@@ -35,14 +41,12 @@ public class StudentController {
 
     // 페이징 처리 없는 학생 목록 조회
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<StudentDTO.Response>> getAllStudents() {
         List<StudentDTO.Response> students = studentService.getAllStudents();
         return ResponseEntity.ok(students);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<StudentDTO.Response> getStudentById(@PathVariable Long id) {
         StudentDTO.Response student = studentService.getStudentById(id);
         return ResponseEntity.ok(student);
@@ -55,6 +59,7 @@ public class StudentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<StudentDTO.Response> createStudent(
             @Valid @RequestBody StudentDTO.Request request,
             @AuthenticationPrincipal(expression = "userInfo") UserInfo currentUser) {
@@ -63,6 +68,7 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<StudentDTO.Response> updateStudent(
             @PathVariable Long id,
             @Valid @RequestBody StudentDTO.Request request) {
@@ -71,6 +77,7 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();

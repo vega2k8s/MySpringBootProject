@@ -12,13 +12,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/*
+ * [ 권한 정책 ]
+ *   조회        : ROLE_USER 또는 ROLE_ADMIN
+ *   등록/수정/삭제 : ROLE_ADMIN
+ */
 @RestController
 @RequestMapping("/api/departments")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
 public class DepartmentController {
 
     private final DepartmentService departmentService;
@@ -68,6 +75,7 @@ public class DepartmentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<DepartmentDTO.Response> createDepartment(@Valid @RequestBody
                                                                        DepartmentDTO.Request request) {
         DepartmentDTO.Response createdDepartment = departmentService.createDepartment(request);
@@ -75,6 +83,7 @@ public class DepartmentController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<DepartmentDTO.Response> updateDepartment(
             @PathVariable Long id,
             @Valid @RequestBody DepartmentDTO.Request request) {
@@ -83,6 +92,7 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return ResponseEntity.noContent().build();

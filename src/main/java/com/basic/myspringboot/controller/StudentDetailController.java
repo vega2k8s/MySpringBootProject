@@ -6,14 +6,20 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//StudentController 클래스
+/*
+ * [ 권한 정책 ]
+ *   조회        : ROLE_USER 또는 ROLE_ADMIN
+ *   등록/수정/삭제 : ROLE_ADMIN
+ */
 @RestController
 @RequestMapping("/api/students/detail")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
 public class StudentDetailController {
 
     private final StudentDetailService studentService;
@@ -37,6 +43,7 @@ public class StudentDetailController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<StudentDTO.Response> createStudent(@Valid @RequestBody StudentDTO.Request request) {
         StudentDTO.Response createdStudent = studentService.createStudent(request);
         //HttpStatus.CREATED - 201
@@ -44,6 +51,7 @@ public class StudentDetailController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<StudentDTO.Response> updateStudent(
             @PathVariable Long id,
             @Valid @RequestBody StudentDTO.Request request) {
@@ -52,6 +60,7 @@ public class StudentDetailController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();
