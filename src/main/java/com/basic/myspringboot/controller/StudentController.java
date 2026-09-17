@@ -1,6 +1,7 @@
 package com.basic.myspringboot.controller;
 
 import com.basic.myspringboot.controller.dto.StudentDTO;
+import com.basic.myspringboot.security.annotation.CurrentUser;
 import com.basic.myspringboot.security.models.UserInfo;
 import com.basic.myspringboot.service.StudentService;
 import jakarta.validation.Valid;
@@ -12,7 +13,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,7 +62,8 @@ public class StudentController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<StudentDTO.Response> createStudent(
             @Valid @RequestBody StudentDTO.Request request,
-            @AuthenticationPrincipal(expression = "userInfo") UserInfo currentUser) {
+            //@AuthenticationPrincipal(expression = "userInfo") UserInfo currentUser 를 감싼 애노테이션
+            @CurrentUser UserInfo currentUser) {
         StudentDTO.Response createdStudent = studentService.createStudent(request, currentUser);
         return new ResponseEntity<>(createdStudent, HttpStatus.CREATED);
     }
