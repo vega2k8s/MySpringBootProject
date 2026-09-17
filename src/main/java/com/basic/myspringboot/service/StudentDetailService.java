@@ -24,7 +24,8 @@ public class StudentDetailService {
     private final StudentDetailRepository studentDetailRepository;
 
     public List<StudentDTO.Response> getAllStudents() {
-        return studentRepository.findAll()
+        //findAll() 대신 Fetch Join 을 사용하여 N+1 문제를 해결한다
+        return studentRepository.findAllWithDetails()
                 .stream()
                 .map(StudentDTO.Response::fromEntity)
                 .toList();
@@ -115,16 +116,10 @@ public class StudentDetailService {
             //Student가 연관된 StudentDetail 객체를 가져오기
             StudentDetail studentDetail = student.getStudentDetail();
 
-            // Create new detail if not exists ( 저장된 StudentDetail 정보가 없을 경우 )
-            if (studentDetail == null) {
-                // 새로운 StudentDetail 객체생성
-                studentDetail = new StudentDetail();
-                //연관된 Student 객체 저장
-                studentDetail.setStudent(student);
-                //연관된 StudenDetail 객체 저장
-                student.setStudentDetail(studentDetail);
-            }
-
+            // 중복 검사를 먼저 수행한다.
+            // 검사용 조회 쿼리가 실행되면 영속성 컨텍스트가 flush 되는데,
+            // 값이 채워지지 않은 StudentDetail 을 먼저 연결해 두면
+            // email, phoneNumber 등 NOT NULL 컬럼에 null 이 들어가 제약조건 위반이 발생한다.
             // Validate email is not already in use (if changing)
             if (isEmailChangingAndExists(studentDetail, request.getDetailRequest())) {
                 throw new BusinessException(ErrorCode.EMAIL_DUPLICATE,
@@ -135,6 +130,16 @@ public class StudentDetailService {
             if (isPhoneNumberChangingAndExists(studentDetail, request.getDetailRequest())) {
                 throw new BusinessException(ErrorCode.PHONE_NUMBER_DUPLICATE,
                         request.getDetailRequest().getPhoneNumber());
+            }
+
+            // Create new detail if not exists ( 저장된 StudentDetail 정보가 없을 경우 )
+            if (studentDetail == null) {
+                // 새로운 StudentDetail 객체생성
+                studentDetail = new StudentDetail();
+                //연관된 Student 객체 저장
+                studentDetail.setStudent(student);
+                //연관된 StudenDetail 객체 저장
+                student.setStudentDetail(studentDetail);
             }
 
             // Update detail fields
@@ -161,9 +166,8 @@ public class StudentDetailService {
     // Helper methods to improve readability and reduce duplication
 
     private boolean hasEmailAndExists(StudentDTO.StudentDetailDTO detailRequest) {
+        //email 은 @NotBlank 로 검증되므로 null / 빈 문자열 검사는 필요 없다
         return detailRequest != null &&
-                detailRequest.getEmail() != null &&
-                !detailRequest.getEmail().isEmpty() &&
                 studentDetailRepository.existsByEmail(detailRequest.getEmail());
     }
 
@@ -174,17 +178,21 @@ public class StudentDetailService {
 
     private boolean isEmailChangingAndExists(StudentDetail currentDetail,
                                              StudentDTO.StudentDetailDTO newDetail) {
-        return newDetail.getEmail() != null &&
-                !newDetail.getEmail().isEmpty() &&
-                (currentDetail.getEmail() == null ||
-                        !currentDetail.getEmail().equals(newDetail.getEmail())) &&
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentEmail = currentDetail == null ? null : currentDetail.getEmail();
+        //email 은 @NotBlank 로 검증되므로 null / 빈 문자열 검사는 필요 없다
+        //값이 실제로 바뀔 때만 중복을 검사한다 ( 자기 자신의 값은 중복이 아니다 )
+        return !newDetail.getEmail().equals(currentEmail) &&
                 studentDetailRepository.existsByEmail(newDetail.getEmail());
     }
 
     private boolean isPhoneNumberChangingAndExists(StudentDetail currentDetail,
                                                    StudentDTO.StudentDetailDTO newDetail) {
-        return (currentDetail.getPhoneNumber() == null ||
-                !currentDetail.getPhoneNumber().equals(newDetail.getPhoneNumber())) &&
+        //상세정보가 아직 없는 경우 currentDetail 은 null 이다
+        String currentPhone = currentDetail == null ? null : currentDetail.getPhoneNumber();
+        //phoneNumber 는 @NotBlank 로 검증되므로 null 검사는 필요 없다
+        //값이 실제로 바뀔 때만 중복을 검사한다 ( 자기 자신의 값은 중복이 아니다 )
+        return !newDetail.getPhoneNumber().equals(currentPhone) &&
                 studentDetailRepository.existsByPhoneNumber(newDetail.getPhoneNumber());
     }
 }

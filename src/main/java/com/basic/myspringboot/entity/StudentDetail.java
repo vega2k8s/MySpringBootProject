@@ -21,13 +21,14 @@ public class StudentDetail {
     @Column(name = "student_detail_id")
     private Long id;
     
-    @Column(nullable = false)
     private String address;
     
-    @Column(nullable = false)
+    //중복될 수 없는 값이므로 DB 에도 UNIQUE 제약을 준다
+    @Column(nullable = false, unique = true)
     private String phoneNumber;
     
-    @Column
+    //중복될 수 없는 값이므로 DB 에도 UNIQUE 제약을 준다
+    @Column(nullable = false, unique = true)
     private String email;
     
     @Column

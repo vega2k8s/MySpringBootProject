@@ -22,45 +22,38 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final StudentRepository studentRepository;
 
-//    public List<DepartmentDTO.SimpleResponse> getAllDepartments() {
-//        return departmentRepository.findAll()
-//                .stream()
-//                .map(DepartmentDTO.SimpleResponse::fromEntity)
-//                .toList();
-//    }
+    /*
+     * [ findAll() 을 쓰지 않는 이유 ]
+     *
+     *   return departmentRepository.findAll().stream()
+     *           .map(d -> SimpleResponse.fromEntity(d, (long) d.getStudents().size()))
+     *           .toList();
+     *
+     * 위와 같이 작성하면 학생 수를 세기 위해 학생 엔티티를 전부 로딩해야 한다.
+     * 게다가 Student.studentDetail 은 mappedBy 쪽 @OneToOne 이라 LAZY 가 동작하지 않고
+     * default_batch_fetch_size 도 적용되지 않아 학생 수만큼 상세정보 조회가 추가된다.
+     *
+     *   학과 4개 / 학생 8명 기준 실제 측정
+     *     findAll() 방식        : SQL 10번 ( 학과1 + 학생1 + 상세정보8 ), 20행 로딩
+     *     findAllSummaries() 방식 : SQL  1번, 4행 로딩
+     *
+     * 응답에 필요한 것은 id, name, code, studentCount 네 개뿐이므로
+     * COUNT 결과만 조회하는 프로젝션을 사용한다.
+     */
 
-    // 페이징 처리없는 모든 학과 조회 - 학생 정보 제외, 별도 카운트 조회
+    // 모든 학과 조회 - 학과 정보와 학생 수를 한 번의 쿼리로 함께 가져온다
     public List<DepartmentDTO.SimpleResponse> getAllDepartments() {
-        List<Department> departments = departmentRepository.findAll();
-
-        return departments.stream()
-                .map(department -> {
-                    // 학생 수만 별도로 조회하여 students 컬렉션에 접근하지 않음
-                    Long studentCount = studentRepository.countByDepartmentId(department.getId());
-                    return DepartmentDTO.SimpleResponse.builder()
-                            .id(department.getId())
-                            .name(department.getName())
-                            .code(department.getCode())
-                            .studentCount(studentCount)
-                            .build();
-                })
+        return departmentRepository.findAllSummaries()
+                .stream()
+                .map(DepartmentDTO.SimpleResponse::fromSummary)
                 .toList();
     }
 
     // 페이징 처리된 모든 학과 조회
+    // 페이징 처리된 학과 조회 - 학과마다 COUNT 를 날리지 않고 집계 쿼리 한 번으로 처리한다
     public Page<DepartmentDTO.SimpleResponse> getAllDepartments(Pageable pageable) {
-        Page<Department> departments = departmentRepository.findAll(pageable);
-
-        return departments.map(department -> {
-            // 학생 수만 별도로 조회하여 students 컬렉션에 접근하지 않음
-            Long studentCount = studentRepository.countByDepartmentId(department.getId());
-            return DepartmentDTO.SimpleResponse.builder()
-                    .id(department.getId())
-                    .name(department.getName())
-                    .code(department.getCode())
-                    .studentCount(studentCount)
-                    .build();
-        });
+        return departmentRepository.findAllSummaries(pageable)
+                .map(DepartmentDTO.SimpleResponse::fromSummary);
     }
 
     public DepartmentDTO.Response getDepartmentById(Long id) {
@@ -71,7 +64,7 @@ public class DepartmentService {
     }
 
     public DepartmentDTO.Response getDepartmentByCode(String code) {
-        Department department = departmentRepository.findByCode(code)
+        Department department = departmentRepository.findByCodeWithStudents(code)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
                         "Department", "code", code));
         return DepartmentDTO.Response.fromEntity(department);
