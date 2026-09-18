@@ -34,6 +34,28 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
     Page<DepartmentSummary> findAllSummaries(Pageable pageable);
 
     //--------------------------------------------------------------------
+    // [ 수업 비교용 ] 1:N 컬렉션을 페이징과 함께 조회하는 잘못된 방법 두 가지.
+    // 실제 서비스 코드에서는 사용하지 않는다. 위의 findAllSummaries(Pageable) 이 정답이다.
+    //--------------------------------------------------------------------
+
+    /**
+     * (A) 컬렉션 Fetch Join + 페이징.
+     * 결과는 맞지만 SQL 에 limit 이 붙지 않아 전체를 읽은 뒤 메모리에서 잘라낸다.
+     * 실행하면 WARN HHH90003004 경고가 출력된다.
+     */
+    @Query(value = "SELECT d FROM Department d LEFT JOIN FETCH d.students",
+            countQuery = "SELECT COUNT(d) FROM Department d")
+    Page<Department> findAllWithStudentsPaged(Pageable pageable);
+
+    /**
+     * (B) FETCH 를 뺀 일반 JOIN + 페이징.
+     * SQL 에 limit 은 붙지만 학생 수만큼 늘어난 행을 자르므로 학과 개수가 요청과 달라진다.
+     */
+    @Query(value = "SELECT d FROM Department d LEFT JOIN d.students",
+            countQuery = "SELECT COUNT(d) FROM Department d")
+    Page<Department> findAllJoinPaged(Pageable pageable);
+
+    //--------------------------------------------------------------------
     // 학과 상세 : 소속 학생과 학생의 상세정보까지 함께 가져온다.
     // Student.studentDetail 은 mappedBy 쪽 @OneToOne 이라 LAZY 가 동작하지 않고,
     // 학생 수만큼 상세정보 조회 쿼리가 추가로 발생하므로 여기서 함께 조회한다.

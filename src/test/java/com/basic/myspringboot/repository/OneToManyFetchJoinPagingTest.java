@@ -37,7 +37,7 @@ class OneToManyFetchJoinPagingTest {
     @Autowired
     EntityManagerFactory emf;
     @Autowired
-    ExpDepartmentRepository repository;
+    DepartmentRepository repository;
 
     private Statistics stats;
 
@@ -90,13 +90,13 @@ class OneToManyFetchJoinPagingTest {
         PageRequest twoRows = PageRequest.of(0, 2, Sort.by("id").ascending());
 
         run("A. 컬렉션 Fetch Join + 페이징   ( LEFT JOIN FETCH d.students )",
-            () -> repository.findAllFetchJoinPaged(twoRows));
+            () -> repository.findAllWithStudentsPaged(twoRows));
 
         run("B. FETCH 없는 일반 JOIN + 페이징 ( LEFT JOIN d.students )",
-            () -> repository.findAllPlainJoinPaged(twoRows));
+            () -> repository.findAllJoinPaged(twoRows));
 
         run("C. 조인 없이 페이징 후 students 접근",
-            () -> repository.findAllNoJoinPaged(twoRows));
+            () -> repository.findAll(twoRows));
 
         System.out.println("\n=================================================");
         System.out.println("  D. 이 예제가 택한 방법 : 프로젝션으로 학생 수만 집계");

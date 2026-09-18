@@ -39,6 +39,25 @@ public class DepartmentController {
         return ResponseEntity.ok(departments);
     }
 
+    //--------------------------------------------------------------------
+    // [ 수업 비교용 ] 1:N 컬렉션 + 페이징을 잘못 조회하면 어떻게 되는지 직접 호출해 보는 엔드포인트.
+    // 콘솔의 SQL 로그와 함께 확인한다. 실제 화면에서는 /api/departments/paged 를 사용한다.
+    //--------------------------------------------------------------------
+
+    //(A) 컬렉션 Fetch Join + 페이징 -> WARN HHH90003004, SQL 에 limit 이 없다
+    @GetMapping("/demo/fetch-join-paged")
+    public ResponseEntity<Page<DepartmentDTO.Response>> getDepartmentsFetchJoinPaged(
+            @PageableDefault(size = 2, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(departmentService.getAllDepartmentsWithStudentsPaged(pageable));
+    }
+
+    //(B) FETCH 없는 일반 JOIN + 페이징 -> limit 은 붙지만 학과 개수가 틀어진다
+    @GetMapping("/demo/plain-join-paged")
+    public ResponseEntity<Page<DepartmentDTO.Response>> getDepartmentsPlainJoinPaged(
+            @PageableDefault(size = 2, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(departmentService.getAllDepartmentsJoinPaged(pageable));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentDTO.Response> getDepartmentById(@PathVariable Long id) {
         DepartmentDTO.Response department = departmentService.getDepartmentById(id);

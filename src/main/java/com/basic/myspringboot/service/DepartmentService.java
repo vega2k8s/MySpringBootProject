@@ -56,6 +56,23 @@ public class DepartmentService {
                 .map(DepartmentDTO.SimpleResponse::fromSummary);
     }
 
+    //--------------------------------------------------------------------
+    // [ 수업 비교용 ] 1:N 컬렉션을 페이징과 함께 조회했을 때 무슨 일이 생기는지 직접 확인하기 위한 메서드.
+    // 실제 화면에서는 위의 getAllDepartments(Pageable) 을 사용한다.
+    //--------------------------------------------------------------------
+
+    //(A) 컬렉션 Fetch Join + 페이징 : 결과는 맞지만 전체를 읽는다 ( HHH90003004 경고 )
+    public Page<DepartmentDTO.Response> getAllDepartmentsWithStudentsPaged(Pageable pageable) {
+        return departmentRepository.findAllWithStudentsPaged(pageable)
+                .map(DepartmentDTO.Response::fromEntity);
+    }
+
+    //(B) FETCH 없는 일반 JOIN + 페이징 : limit 은 붙지만 학과 개수가 틀어진다
+    public Page<DepartmentDTO.Response> getAllDepartmentsJoinPaged(Pageable pageable) {
+        return departmentRepository.findAllJoinPaged(pageable)
+                .map(DepartmentDTO.Response::fromEntity);
+    }
+
     public DepartmentDTO.Response getDepartmentById(Long id) {
         Department department = departmentRepository.findByIdWithStudents(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESOURCE_NOT_FOUND,
