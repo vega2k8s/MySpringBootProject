@@ -3,6 +3,10 @@ package com.basic.myspringboot.security.controller;
 import com.basic.myspringboot.security.controller.dto.AuthRequest;
 import com.basic.myspringboot.security.controller.dto.AuthResponse;
 import com.basic.myspringboot.security.controller.dto.SignUpRequest;
+import com.basic.myspringboot.security.controller.dto.UserInfoResponse;
+import com.basic.myspringboot.security.models.UserInfoUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.basic.myspringboot.security.jwt.JwtService;
 import com.basic.myspringboot.security.models.UserInfo;
 import com.basic.myspringboot.security.models.UserInfoRepository;
@@ -61,14 +65,25 @@ public class UserInfoController {
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> authenticateAndGetToken(@Valid @RequestBody AuthRequest authRequest) {
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getEmail(),
                         authRequest.getPassword()
                 ));
 
-        String token = jwtService.generateToken(authRequest.getEmail());
-        return ResponseEntity.ok(
-                new AuthResponse(token, "Bearer", jwtService.getAccessExpireSeconds()));
+        //인증에 성공하면 principal 에 UserInfoUserDetails 가 들어 있다
+        UserInfoUserDetails userDetails = (UserInfoUserDetails) authentication.getPrincipal();
+        String token = jwtService.generateToken(userDetails.getUsername());
+        return ResponseEntity.ok(AuthResponse.of(token, jwtService.getAccessExpireSeconds(),
+                UserInfoResponse.from(userDetails)));
+    }
+
+    /**
+     * 로그인한 사용자 정보. 새로고침 후 토큰만 남아 있을 때 권한을 다시 확인하는 용도.
+     * 토큰이 없거나 잘못되면 SecurityConfig 의 EntryPoint 가 401 을 응답한다.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoResponse> me(@AuthenticationPrincipal UserInfoUserDetails userDetails) {
+        return ResponseEntity.ok(UserInfoResponse.from(userDetails));
     }
 }
