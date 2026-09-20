@@ -32,7 +32,7 @@ public class StudentDTO {
         private Long departmentId;
 
         //StudentDetail 의 phoneNumber, email 이 NOT NULL 이므로 상세정보는 반드시 입력해야 한다
-        @NotNull(message = "Student detail is required")
+        //@NotNull(message = "Student detail is required")
         @Valid
         private StudentDetailDTO detailRequest;
     }

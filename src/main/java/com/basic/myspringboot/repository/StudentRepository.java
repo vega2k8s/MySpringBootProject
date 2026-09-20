@@ -86,7 +86,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     //--------------------------------------------------------------------
     // 검색 ( 페이징 )
     //--------------------------------------------------------------------
-
+    //WHERE 조건이 Student 자신의 컬럼만 있어서 countQuery를 생략하였음
     @Query("SELECT s FROM Student s "
             + "LEFT JOIN FETCH s.studentDetail "
             + "LEFT JOIN FETCH s.department "
@@ -100,7 +100,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     Page<Student> findByStudentNumberContainingIgnoreCase(@Param("studentNumber") String studentNumber,
                                                           Pageable pageable);
 
-    //WHERE 에 s.department 가 있어 자동 생성 count 쿼리에 departments 조인이 남으므로 직접 지정한다
+    //WHERE 조건에 s.department 가 있어 자동 생성 countQuery에 departments 조인이 남으므로 직접 지정한다
     @Query(value = "SELECT s FROM Student s "
             + "LEFT JOIN FETCH s.studentDetail "
             + "LEFT JOIN FETCH s.department "
